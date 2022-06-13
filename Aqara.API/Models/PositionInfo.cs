@@ -1,4 +1,6 @@
-﻿namespace Aqara.API.Models;
+﻿using System.Text;
+
+namespace Aqara.API.Models;
 
 public class PositionInfo
 {
@@ -11,4 +13,9 @@ public class PositionInfo
     public string Description { get; init; } = null!;
 
     public DateTime CreationTime { get; init; }
+
+    public override string ToString() => (Description is { Length: > 0 } description
+            ? new StringBuilder(PositionId).Append(':').Append(Name).Append(':').Append(description)
+            : new StringBuilder(PositionId).Append(':').Append(Name))
+       .ToString();
 }

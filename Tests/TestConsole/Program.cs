@@ -46,7 +46,8 @@ try
 
     //var token = await client.RefreshAccessToken();
 
-    var result = await client.GetPositions();
+    //var positions = await client.GetPositions();
+    var devices = await client.GetDevices("real1.930999863490531328")
 }
 catch (AqaraAPIException error)
 {

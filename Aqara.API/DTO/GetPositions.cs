@@ -64,7 +64,4 @@ public class GetPositionsResponse : Response
             public string ParentPositionId { get; init; } = null!;
         }
     }
-
-    [JsonExtensionData]
-    public IDictionary<string, object>? OtherValues { get; init; }
 }

@@ -217,4 +217,12 @@ public class AqaraClient
            })
            .ToArray();
     }
+
+    public async Task<DeviceInfo> GetDevices(string? PositionId = null, int? Page = 1, int PageSize = 30, CancellationToken Cancel = default)
+    {
+
+
+
+        return null;
+    }
 }
