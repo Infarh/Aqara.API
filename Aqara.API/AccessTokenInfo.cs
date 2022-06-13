@@ -8,7 +8,10 @@ public record AccessTokenInfo(string AccessToken, string RefreshToken, int Expir
     [JsonIgnore]
     public DateTime ExpiresTime => CreationTime.AddSeconds(Expires);
 
-    public static async Task<AccessTokenInfo> ReadFromFileAsync(string FileName, CancellationToken Cancel = default)
+    [JsonIgnore]
+    public bool IsExpire => DateTime.Now > ExpiresTime;
+
+    public static async Task<AccessTokenInfo?> ReadFromFileAsync(string FileName, CancellationToken Cancel = default)
     {
         if (!File.Exists(FileName)) throw new FileNotFoundException("Файл данных токена не найден", FileName);
 

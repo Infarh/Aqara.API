@@ -34,7 +34,7 @@ internal static class HttpRequestHeadersExtensions
 
 internal static class AqaraClientConfigExtensions
 {
-    public static HttpClient AddHeaders(this HttpClient client, AqaraClientConfig Configuration)
+    public static HttpClient AddHeaders(this HttpClient client, AqaraClientConfig Configuration, string? AccessToken)
     {
         var headers = client.DefaultRequestHeaders;
 
@@ -54,7 +54,8 @@ internal static class AqaraClientConfigExtensions
         var sign = SignBuilder.Create()
            .AddAppId(app_id)
            .AddKeyId(key_id)
-           .AddAppKey(Configuration.AppKey);
+           .AddAppKey(Configuration.AppKey)
+           .AddAccessToken(AccessToken);
 
         headers.Replace(header_nonce, sign.Nonce);
         headers.Replace(header_time, sign.Time.ToString());

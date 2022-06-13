@@ -37,7 +37,7 @@ public readonly ref struct SignBuilder
 
     public string? AppKey { get; init; }
 
-    public SignBuilder AddAccessToken(string AccessToken) => this with { AccessToken = AccessToken };
+    public SignBuilder AddAccessToken(string? AccessToken) => this with { AccessToken = AccessToken };
     public SignBuilder AddAppId(string AppId) => this with { AppId = AppId };
     public SignBuilder AddKeyId(string KeyId) => this with { KeyId = KeyId };
     public SignBuilder AddNonce(string Nonce) => this with { Nonce = Nonce };

@@ -11,7 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-
 //const string response_json = @"{""code"":0,""message"":""Success"",""msgDetails"":null,""requestId"":""676.194.16551404702160737"",""result"":{""expiresIn"":""604800"",""openId"":""688199722857985578667851698177"",""accessToken"":""89a7ee6dd6698aebf7ed01f1bc548d00"",""refreshToken"":""baaa54b825fb07da282e8386eca9353d""}}";
 //const string response_json = @"{
 //    ""code"": 0,
@@ -45,7 +44,9 @@ try
 
     //var token_info = await client.ObtainAccessToken(config["Aqara:VerificationCode"], config["Aqara:Account"]);
 
-    var token2_info = await client.RefreshAccessToken();
+    //var token = await client.RefreshAccessToken();
+
+    var result = await client.GetPositions();
 }
 catch (AqaraAPIException error)
 {

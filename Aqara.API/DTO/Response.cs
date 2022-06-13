@@ -17,5 +17,9 @@ public abstract class Response
     public string Message { get; init; } = null!;
 
     [JsonPropertyName("msgDetails")]
+    //[JsonPropertyName("messageDetail")]
     public string? MessageDetails { get; init; }
+
+    [JsonPropertyName("messageDetail")]
+    public string? OtherMessages { get; init; }
 }
