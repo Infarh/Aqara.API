@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Channels;
 
 using Aqara.API.DTO;
 using Aqara.API.Exceptions;
@@ -103,8 +104,51 @@ public class AqaraClient
 
         var access_token = result.Result!.AccessToken;
         var refresh_token = result.Result.RefreshToken;
+        var expire = int.Parse(result.Result.ExpiresIn);
+        var open_id = result.Result.OpenId;
 
-        var token = new AccessTokenInfo(access_token, refresh_token);
+        var token = new AccessTokenInfo(access_token, refresh_token, expire, open_id, DateTime.Now);
+
+        AccessToken = token;
+
+        return token;
+    }
+
+    public async Task<AccessTokenInfo> RefreshAccessToken(CancellationToken Cancel = default)
+    {
+        if (_AccessToken is null)
+            throw new InvalidOperationException("Невозможно обновить токен авторизации потом, что отсутствует информация о старом токене авторизации");
+
+        var data = new RefreshAccessTokenRequest(_AccessToken.RefreshToken);
+
+        var response = await ClientWithoutAccessToken
+           .PostAsJsonAsync("", data, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }, Cancel)
+           .ConfigureAwait(false);
+
+        var result = await response
+           .EnsureSuccessStatusCode()
+           .Content
+           .ReadFromJsonAsync<RefreshAccessTokenResponse>(cancellationToken: Cancel);
+
+        if (result is null)
+            throw new RefreshAccessTokenException("Не удалось получить ответ от сервера")
+            {
+                RequestData = data
+            };
+
+        if (result.ErrorCode != ErrorCode.Success)
+            throw new RefreshAccessTokenException($"Ошибка получения токена авторизации {result.Message} {result.MessageDetails}")
+            {
+                RequestData = data,
+                ResponseData = result,
+            };
+
+        var access_token = result.Result!.AccessToken;
+        var refresh_token = result.Result.RefreshToken;
+        var expire = int.Parse(result.Result.ExpiresIn);
+        var open_id = result.Result.OpenId;
+
+        var token = new AccessTokenInfo(access_token, refresh_token, expire, open_id, DateTime.Now);
 
         AccessToken = token;
 

@@ -43,7 +43,9 @@ try
 {
     //var code = await client.RequestAuthorizationKey(config["Aqara:Account"], "24h");
 
-    var token_info = await client.ObtainAccessToken(config["Aqara:VerificationCode"], config["Aqara:Account"]);
+    //var token_info = await client.ObtainAccessToken(config["Aqara:VerificationCode"], config["Aqara:Account"]);
+
+    var token2_info = await client.RefreshAccessToken();
 }
 catch (AqaraAPIException error)
 {
