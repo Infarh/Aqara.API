@@ -7,19 +7,27 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Aqara.API.TestConsole</RootNamespace>
     <LangVersion>preview</LangVersion>
+    <UserSecretsId>8192a402-207f-4f13-a570-34e327a10d0e</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Include="Aqara.API" />
     <Using Include="System" />
     <Using Include="System.Threading.Tasks" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MathCore.Hosting" Version="0.0.4.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+    <PackageReference Include="System.CommandLine.Hosting" Version="0.4.0-alpha.22272.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Aqara.API\Aqara.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
