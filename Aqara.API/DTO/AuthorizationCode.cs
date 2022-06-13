@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
+
 using Aqara.API.Infrastructure;
 
 namespace Aqara.API.DTO;
@@ -57,7 +58,11 @@ public class AuthorizationCodeRequest
 
         [JsonPropertyName("AccessTokenValidity")]
         public string AccessTokenValidity { get; }
+
+        public override string ToString() => $"account:{Account},validity:{AccessTokenValidity}";
     }
+
+    public override string ToString() => $"intent:{Intent},data:{{{Data}}}";
 }
 
 public class AuthorizationCodeResponse : Response
@@ -70,4 +75,6 @@ public class AuthorizationCodeResponse : Response
         [JsonPropertyName("authCode")]
         public string? AuthorizationCode { get; init; }
     }
+
+    public override string ToString() => $"code:{Code}({ErrorCode}),msg:{Message}";
 }

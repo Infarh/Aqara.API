@@ -1,9 +1,12 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Aqara.API.DTO;
 using Aqara.API.Exceptions;
 using Aqara.API.Infrastructure;
+
 using Microsoft.Extensions.Options;
 
 namespace Aqara.API;
@@ -19,7 +22,7 @@ public class AqaraClient
         get => _AccessToken ??= GetAccessToken(_Configuration.TokenStorageFile);
         set
         {
-            if(Equals(_AccessToken, value)) return;
+            if (Equals(_AccessToken, value)) return;
             _AccessToken = value;
             value?.SaveToFile(_Configuration.TokenStorageFile);
         }
@@ -35,11 +38,13 @@ public class AqaraClient
     {
         _Client = Client;
         _Configuration = Configuration.Value;
+        if (_Configuration.TokenStorageFile is { Length: > 0 } access_token_file && File.Exists(access_token_file))
+            _AccessToken = AccessTokenInfo.ReadFromFile(access_token_file);
     }
 
     public async Task<string?> RequestAuthorizationKey(
         string Account,
-        string AccessTokenValidity = "1h", 
+        string AccessTokenValidity = "1h",
         AccountType AccountType = AccountType.Aqara,
         CancellationToken Cancel = default)
     {
@@ -66,8 +71,43 @@ public class AqaraClient
         return result.Result!.AuthorizationCode;
     }
 
-    //public async Task<AccessTokenInfo> ObtainAccessToken(string VerificationCode)
-    //{
+    public async Task<AccessTokenInfo> ObtainAccessToken(
+        string VerificationCode,
+        string? Account = null,
+        AccountType AccountType = AccountType.Aqara,
+        CancellationToken Cancel = default)
+    {
+        var data = new AccessTokenRequest(VerificationCode, Account, AccountType);
 
-    //}
+        var response = await ClientWithoutAccessToken
+           .PostAsJsonAsync("", data, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }, Cancel)
+           .ConfigureAwait(false);
+
+        var result = await response
+           .EnsureSuccessStatusCode()
+           .Content
+           .ReadFromJsonAsync<AccessTokenResponse>(cancellationToken: Cancel);
+
+        if (result is null)
+            throw new RequestAccessTokenException("Не удалось получить ответ от сервера")
+            {
+                RequestData = data
+            };
+
+        if (result.ErrorCode != ErrorCode.Success)
+            throw new RequestAccessTokenException($"Ошибка получения токена авторизации {result.Message} {result.MessageDetails}")
+            {
+                RequestData = data,
+                ResponseData = result,
+            };
+
+        var access_token = result.Result!.AccessToken;
+        var refresh_token = result.Result.RefreshToken;
+
+        var token = new AccessTokenInfo(access_token, refresh_token);
+
+        AccessToken = token;
+
+        return token;
+    }
 }
