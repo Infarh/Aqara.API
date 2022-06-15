@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -213,16 +214,133 @@ public class AqaraClient
                ParentPositionId = position.ParentPositionId,
                Name = position.Name,
                Description = position.Description,
-               CreationTime = DateTime.UnixEpoch.AddTicks(position.CreateTime * 10000)
+               CreateTime = DateTime.UnixEpoch.AddTicks(position.CreateTime * 10000)
            })
            .ToArray();
     }
 
-    public async Task<DeviceInfo> GetDevices(string? PositionId = null, int? Page = 1, int PageSize = 30, CancellationToken Cancel = default)
+    public async Task<DeviceInfo[]> GetDevicesByPosition(string? PositionId = null, int? Page = 1, int PageSize = 30, CancellationToken Cancel = default)
     {
+        var data = new GetDevicesByPositionRequest(PositionId, Page, PageSize);
 
+        var json_request = JsonSerializer.Serialize(data);
 
+        var client = await GetClientWithAccessToken(Cancel);
 
-        return null;
+        var response = await client
+           .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .ConfigureAwait(false);
+
+        var result = await response
+           .EnsureSuccessStatusCode()
+           .Content
+           .ReadFromJsonAsync<GetDevicesByPositionResponse>(cancellationToken: Cancel);
+
+        if (result is null)
+            throw new GetDevicesByPositionException("Не удалось получить ответ от сервера")
+            {
+                RequestData = data
+            };
+
+        if (result.ErrorCode != ErrorCode.Success)
+            throw new GetDevicesByPositionException($"Ошибка получения токена авторизации {result.Message} {result.MessageDetails}")
+            {
+                RequestData = data,
+                ResponseData = result,
+            };
+
+        return result.Result.Data
+           .Select(device => new DeviceInfo
+           {
+               Id = device.Id,
+               ParentId = device.ParentId,
+               PositionId = device.PositionId,
+               DeviceName = device.DeviceName,
+               CreateTime = DateTime.UnixEpoch.AddTicks(device.CreateTime * 10000),
+               UpdateTime = DateTime.UnixEpoch.AddTicks(device.UpdateTime * 10000),
+               TimeZone = device.TimeZone,
+               Model = device.Model,
+               ModelType = device.ModelType switch
+               {
+                   1 => DeviceModelType.GatewayWithChilds,
+                   2 => DeviceModelType.GatewayWithoutChilds,
+                   3 => DeviceModelType.SubDevice,
+                   _ => throw new GetDevicesByPositionException($"Некорректное значение типа модели устройства {device.ModelType}")
+                   {
+                       RequestData = data,
+                       ResponseData = result,
+                   }
+               },
+               OnlineState = device.State switch
+               {
+                   0 => false,
+                   1 => true,
+                   _ => throw new GetDevicesByPositionException($"Некорректное значение состояния устройства {device.State}")
+                   {
+                       RequestData = data,
+                       ResponseData = result,
+                   }
+               },
+               FirmwareVersion = device.FirmwareVersion,
+           })
+           .ToArray();
+    }
+
+    public async Task<DeviceFeatureInfo[]> GetDeviceModelFeatures(string Model, string? ResourceId = null, CancellationToken Cancel = default)
+    {
+        var data = new GetDeviceModelFeaturesRequest(Model, ResourceId);
+
+        var json_request = JsonSerializer.Serialize(data);
+
+        var client = await GetClientWithAccessToken(Cancel);
+
+        var response = await client
+           .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .ConfigureAwait(false);
+
+        //var result_json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        var result = await response
+           .EnsureSuccessStatusCode()
+           .Content
+           .ReadFromJsonAsync<GetDeviceModelFeaturesResponse>(cancellationToken: Cancel);
+
+        if (result is null)
+            throw new GetDeviceModelFeaturesException("Не удалось получить ответ от сервера")
+            {
+                RequestData = data
+            };
+
+        if (result.ErrorCode != ErrorCode.Success)
+            throw new GetDeviceModelFeaturesException($"Ошибка получения токена авторизации {result.Message} {result.MessageDetails}")
+            {
+                RequestData = data,
+                ResponseData = result,
+            };
+
+        return result.Result
+           .Select(info => new DeviceFeatureInfo
+            {
+               ResourceId = info.ResourceId,
+               Name = info.Name,
+               NameEn = info.NameEn,
+               Description = info.Description,
+               DescriptionEn = info.DescriptionEn,
+               MinValue = info.MinValue,
+               MaxValue = info.MaxValue,
+               DefaultValue = info.DefaultValue,
+               Unit = info.Unit,
+               Server = info.Server,
+               SubjectModel = info.SubjectModel,
+               Enums = info.Enums,
+               Access = info.Access switch
+               {
+                   0 => DeviceFeatureAccess.Read,
+                   1 => DeviceFeatureAccess.Write,
+                   2 => DeviceFeatureAccess.ReadWrite,
+                   _=> (DeviceFeatureAccess)info.Access
+               },
+            })
+           .ToArray();
     }
 }

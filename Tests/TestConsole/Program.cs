@@ -47,7 +47,14 @@ try
     //var token = await client.RefreshAccessToken();
 
     //var positions = await client.GetPositions();
-    var devices = await client.GetDevices("real1.930999863490531328")
+    //var devices = await client.GetDevicesByPosition("real1.930999863490531328");
+    //var devices = await client.GetDevicesByPosition("real1.930999863490531328");
+
+    //const string device_id = "lumi.158d00071102f1";
+    //const string device_model_id = "lumi.weather.v1";
+    //var resources = await client.GetDeviceModelFeatures(device_model_id);
+
+    const string resource_temperature = "0.1.85";
 }
 catch (AqaraAPIException error)
 {

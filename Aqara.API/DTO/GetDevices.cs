@@ -2,13 +2,16 @@
 
 namespace Aqara.API.DTO;
 
-public class GetDevicesRequest
+public class GetDevicesByPositionRequest
 {
-    public GetDevicesRequest(string? PositionId, int? PageNum, int? PageSize) =>
+    public GetDevicesByPositionRequest(string? PositionId, int? PageNum, int? PageSize) =>
         Data = new(PositionId, PageNum, PageSize);
 
     [JsonPropertyName("intent")]
     public string Intent => Addresses.Device.QueryDeviceInformation;
+
+    [JsonPropertyName("dids")]
+    public List<string>? DevicesIds { get; init; } = new();
 
     [JsonPropertyName("data")]
     public GetDevicesRequestData Data { get; }
@@ -30,10 +33,14 @@ public class GetDevicesRequest
 
         [JsonPropertyName("pageSize")]
         public int? PageSize { get; }
+
+        public override string ToString() => $"pos:{(PositionId is { Length: > 0 } pos ? pos : "all")},page:{PageNum ?? 1},size:{PageSize ?? 30}";
     }
+
+    public override string ToString() => $"{Intent}:{{{Data}}}";
 }
 
-public class GetDevicesResponse : Response
+public class GetDevicesByPositionResponse : Response
 {
     [JsonPropertyName("result")]
     public GetDevicesResponseResult Result { get; init; } = null!;
@@ -80,6 +87,12 @@ public class GetDevicesResponse : Response
 
             [JsonPropertyName("deviceName")]
             public string DeviceName { get; init; } = null!;
+
+            public override string ToString() => $"{Id}:{DeviceName}(type:{Model})online:{(Model == "1")}";
         }
+
+        public override string ToString() => $"count:{TotalCount}";
     }
+
+    public override string ToString() => $"devices:{{{Result}}}";
 }
