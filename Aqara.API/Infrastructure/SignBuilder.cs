@@ -1,10 +1,11 @@
 ﻿using System.Text;
 
+using Aqara.API.Exceptions;
+
 namespace Aqara.API.Infrastructure;
 
 public readonly ref struct SignBuilder
 {
-    private const long __TimeDelta = 621355968000000000;
     private static readonly string __NonceChars = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     private static string MakeRandomString(int Length = 20)
@@ -21,7 +22,7 @@ public readonly ref struct SignBuilder
 
     public static SignBuilder Create() => new()
     {
-        Time = (DateTime.UtcNow.Ticks - __TimeDelta) / 10000,
+        Time = DateTime.UtcNow.ToUnixTimeTicks(),
         Nonce = MakeRandomString(),
     };
 
@@ -42,8 +43,8 @@ public readonly ref struct SignBuilder
     public SignBuilder AddKeyId(string KeyId) => this with { KeyId = KeyId };
     public SignBuilder AddNonce(string Nonce) => this with { Nonce = Nonce };
     public SignBuilder MakeNonce() => this with { Nonce = MakeRandomString() };
-    public SignBuilder AddCurrentTime() => AddTime((DateTime.UtcNow.Ticks - __TimeDelta) / 10000);
-    public SignBuilder AddTime(DateTime Time) => this with { Time = (Time.Ticks - __TimeDelta) / 10000 };
+    public SignBuilder AddCurrentTime() => AddTime(DateTime.UtcNow.ToUnixTimeTicks());
+    public SignBuilder AddTime(DateTime Time) => this with { Time = Time.ToUnixTimeTicks() };
     public SignBuilder AddTime(long Time) => this with { Time = Time };
     public SignBuilder AddAppKey(string AppKey) => this with { AppKey = AppKey };
 

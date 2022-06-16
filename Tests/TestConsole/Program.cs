@@ -10,16 +10,7 @@ using Aqara.API.TestConsole.Infrastructure.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-//const string response_json = @"{""code"":0,""message"":""Success"",""msgDetails"":null,""requestId"":""676.194.16551404702160737"",""result"":{""expiresIn"":""604800"",""openId"":""688199722857985578667851698177"",""accessToken"":""89a7ee6dd6698aebf7ed01f1bc548d00"",""refreshToken"":""baaa54b825fb07da282e8386eca9353d""}}";
-//const string response_json = @"{
-//    ""code"": 0,
-//    ""message"": ""Success"",
-//    ""msgDetails"": null,
-//    ""requestId"": ""676.194.16551404702160737"",
-//    ""result"": """" }";
-
-//var response = JsonSerializer.Deserialize<AccessTokenResponse>(response_json);
+using Microsoft.Extensions.Options;
 
 var host = Host.CreateDefaultBuilder(args)
    .ConfigureAppConfiguration(cfg => cfg
@@ -27,7 +18,18 @@ var host = Host.CreateDefaultBuilder(args)
        .AddCommandLine(args))
    .ConfigureServices((env, Services) =>
     {
-        Services.Configure<AqaraClientConfig>(env.Configuration.GetSection("Aqara"));
+        Services.AddOptions<AqaraClientConfig>()
+           .Bind(env.Configuration.GetSection("Aqara"))
+           .Validate(o => o.TokenStorageFile is { Length: > 0 }, "Не задан путь к файлу хранилища ключей")
+           .Validate(o => o.AppId is { Length: > 0 })
+           .Validate(o => o.KeyId is { Length: > 0 })
+           .Validate(o => o.AppKey is { Length: > 0 })
+           .ValidateDataAnnotations()
+           .ValidateOnStart()
+           .Services
+           .AddTransient(s => s.GetRequiredService<IOptionsSnapshot<AqaraClientConfig>>().Value);
+
+        Services.AddSingleton<IAccessTokenSource>(_ => new AccessTokenFileSource("AccessToken.json"));
         Services.AddHttpClient<AqaraClient>("Aqara", (s, client) => client.BaseAddress = new(s.GetConfigValue("Aqara:Address")));
     })
    .Build();
@@ -44,17 +46,22 @@ try
 
     //var token_info = await client.ObtainAccessToken(config["Aqara:VerificationCode"], config["Aqara:Account"]);
 
-    //var token = await client.RefreshAccessToken();
+    var token = await client.RefreshAccessToken();
 
     //var positions = await client.GetPositions();
     //var devices = await client.GetDevicesByPosition("real1.930999863490531328");
     //var devices = await client.GetDevicesByPosition("real1.930999863490531328");
 
-    //const string device_id = "lumi.158d00071102f1";
-    //const string device_model_id = "lumi.weather.v1";
+    const string device_id = "lumi.158d00071102f1";
+    const string device_model_id = "lumi.weather.v1";
     //var resources = await client.GetDeviceModelFeatures(device_model_id);
 
     const string resource_temperature = "0.1.85";
+    var values = await client.GetDeviceFeatureStatistic(
+        device_id, 
+        new[] { resource_temperature }, 
+        FeatureStatisticAggregationType.Average, 
+        DateTime.Now.AddDays(5));
 }
 catch (AqaraAPIException error)
 {

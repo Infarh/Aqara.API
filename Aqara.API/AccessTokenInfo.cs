@@ -34,6 +34,7 @@ public record AccessTokenInfo(string AccessToken, string RefreshToken, int Expir
 
     public async Task SaveToFileAsync(string FileName, CancellationToken Cancel = default)
     {
+        await using var cancel_registration = Cancel.Register(o => File.Delete((string)o!), FileName);
         await using var writer = File.OpenWrite(FileName);
         await JsonSerializer
            .SerializeAsync(writer, this, new JsonSerializerOptions { WriteIndented = true }, Cancel)

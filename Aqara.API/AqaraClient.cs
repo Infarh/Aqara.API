@@ -1,5 +1,7 @@
-﻿using System.Net.Http.Json;
+﻿using System.ComponentModel;
+using System.Net.Http.Json;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -23,46 +25,30 @@ public class AqaraClient
 
     private readonly HttpClient _Client;
     private readonly AqaraClientConfig _Configuration;
-    private AccessTokenInfo? _AccessToken = null;
-
-    private AccessTokenInfo? AccessToken
-    {
-        get => _AccessToken;// ??= GetAccessToken(_Configuration.TokenStorageFile);
-        set
-        {
-            if (Equals(_AccessToken, value)) return;
-            _AccessToken = value;
-            value?.SaveToFile(_Configuration.TokenStorageFile);
-        }
-    }
-
-    private static AccessTokenInfo? GetAccessToken(string FileName) => File.Exists(FileName) ? AccessTokenInfo.ReadFromFile(FileName) : null;
-
-    private static async Task<AccessTokenInfo?> GetAccessTokenAsync(string FileName, CancellationToken Cancel) =>
-        File.Exists(FileName)
-            ? await AccessTokenInfo.ReadFromFileAsync(FileName, Cancel).ConfigureAwait(false)
-            : null;
+    private readonly IAccessTokenSource _AccessTokenSource;
 
     private HttpClient GetClient(string? AccessToken = null) => _Client.AddHeaders(_Configuration, AccessToken);
 
-    public AqaraClient(HttpClient Client, IOptionsSnapshot<AqaraClientConfig> Configuration)
+    public AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource, AqaraClientConfig Configuration)
     {
         _Client = Client;
-        _Configuration = Configuration.Value;
+        _Configuration = Configuration;
+        _AccessTokenSource = AccessTokenSource;
     }
 
     private async Task<HttpClient> GetClientWithAccessToken(CancellationToken Cancel)
     {
-        if (AccessToken is not { } token)
-        {
-            var token_file = _Configuration.TokenStorageFile;
-            token = File.Exists(token_file)
-                ? _AccessToken = await AccessTokenInfo.ReadFromFileAsync(token_file, Cancel).ConfigureAwait(false)
-                : throw new InvalidOperationException("Отсутствует токен доступа");
-        }
+        if(await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false) is not { } token) 
+            throw new InvalidOperationException("Отсутствует токен доступа");
 
-        if (token.IsExpire)
-            await RefreshAccessToken(Cancel).ConfigureAwait(false);
+        if (!token.IsExpire) 
+            return GetClient(token.AccessToken).AddAccessToken(token);
+
+        token = await RefreshAccessToken(Cancel).ConfigureAwait(false);
+        if(token is null || token.IsExpire)
+            throw new InvalidOperationException("Не удалось обновить токен доступа");
+
+        await _AccessTokenSource.SetAccessToken(token, Cancel);
 
         return GetClient(token.AccessToken).AddAccessToken(token);
     }
@@ -133,15 +119,14 @@ public class AqaraClient
 
         var token = new AccessTokenInfo(access_token, refresh_token, expire, open_id, DateTime.Now);
 
-        AccessToken = token;
+        await _AccessTokenSource.SetAccessToken(token, Cancel).ConfigureAwait(false);
 
         return token;
     }
 
     public async Task<AccessTokenInfo> RefreshAccessToken(CancellationToken Cancel = default)
     {
-        var token = _AccessToken ?? await GetAccessTokenAsync(_Configuration.TokenStorageFile, Cancel).ConfigureAwait(false);
-        if (token is null)
+        if (await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false) is not { } token)
             throw new InvalidOperationException("Невозможно обновить токен авторизации потом, что отсутствует информация о старом токене авторизации");
 
         var data = new RefreshAccessTokenRequest(token.RefreshToken);
@@ -175,8 +160,7 @@ public class AqaraClient
 
         var result_token = new AccessTokenInfo(access_token, refresh_token, expire, open_id, DateTime.Now);
 
-        AccessToken = result_token;
-        return result_token;
+        return await _AccessTokenSource.SetAccessToken(result_token, Cancel);
     }
 
     public async Task<PositionInfo[]> GetPositions(string? ParentPositionId = null, int? Page = 1, int? PageSize = 30, CancellationToken Cancel = default)
@@ -343,4 +327,138 @@ public class AqaraClient
             })
            .ToArray();
     }
+
+    public async Task<StatisticValueInfo[]> GetDeviceFeatureStatistic(
+        string DeviceId, 
+        IEnumerable<string> FeatureId,
+        FeatureStatisticAggregationType AggregationType,
+        DateTime StartTime,
+        FeatureStatisticAggregationDimension Dimension = FeatureStatisticAggregationDimension.Interval30m,
+        DateTime? EndTime = null,
+        int? Size = null,
+        CancellationToken Cancel = default)
+    {
+        var features = FeatureId as IReadOnlyCollection<string> ?? FeatureId.ToArray();
+
+        List<int> aggregation_type;
+        if (AggregationType is FeatureStatisticAggregationType.All or FeatureStatisticAggregationType.All2)
+            aggregation_type = new List<int> { 0, 1, 2, 3, 4 };
+        else
+        {
+            aggregation_type = new List<int>();
+
+            if((AggregationType & FeatureStatisticAggregationType.Difference) == FeatureStatisticAggregationType.Difference)
+                aggregation_type.Add(0);
+
+            if((AggregationType & FeatureStatisticAggregationType.Min) == FeatureStatisticAggregationType.Min)
+                aggregation_type.Add(1);
+
+            if((AggregationType & FeatureStatisticAggregationType.Max) == FeatureStatisticAggregationType.Max)
+                aggregation_type.Add(2);
+
+            if((AggregationType & FeatureStatisticAggregationType.Average) == FeatureStatisticAggregationType.Average)
+                aggregation_type.Add(3);
+
+            if((AggregationType & FeatureStatisticAggregationType.Frequency) == FeatureStatisticAggregationType.Frequency)
+                aggregation_type.Add(3);
+        }
+
+        var dimension = Dimension switch
+        {
+            FeatureStatisticAggregationDimension.Interval30m => "30m",
+            FeatureStatisticAggregationDimension.Interval1h => "1h",
+            FeatureStatisticAggregationDimension.Interval2h => "2h",
+            FeatureStatisticAggregationDimension.Interval3h => "3h",
+            FeatureStatisticAggregationDimension.Interval4h => "4h",
+            FeatureStatisticAggregationDimension.Interval5h => "5h",
+            FeatureStatisticAggregationDimension.Interval6h => "6h",
+            FeatureStatisticAggregationDimension.Interval12h => "12h",
+            FeatureStatisticAggregationDimension.Interval1d => "1d",
+            FeatureStatisticAggregationDimension.Interval7d => "7d",
+            _ => throw new InvalidEnumArgumentException(nameof(Dimension), (int)Dimension, typeof(FeatureStatisticAggregationDimension))
+        };
+
+        var start_time = StartTime.ToUniversalTime();
+        var end_time = EndTime?.ToUniversalTime();
+
+        var data = new GetDeviceFeatureStatisticRequest(DeviceId, aggregation_type, features, start_time, end_time, dimension, Size);
+
+        var json_request = JsonSerializer.Serialize(data, new JsonSerializerOptions(__SerializerOptions) { WriteIndented = true });
+
+        var client = await GetClientWithAccessToken(Cancel);
+
+        var response = await client
+           .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .ConfigureAwait(false);
+
+        var result_json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        var result = await response
+           .EnsureSuccessStatusCode()
+           .Content
+           .ReadFromJsonAsync<GetDeviceFeatureStatisticResponse>(cancellationToken: Cancel);
+
+        if (result is null)
+            throw new GetDeviceFeatureStatisticException("Не удалось получить ответ от сервера")
+            {
+                RequestData = data
+            };
+
+        if (result.ErrorCode != ErrorCode.Success)
+            throw new GetDeviceFeatureStatisticException($"Ошибка получения токена авторизации {result.Message} {result.MessageDetails}")
+            {
+                RequestData = data,
+                ResponseData = result,
+            };
+
+        return result.Result.Data
+           .Select(info => new StatisticValueInfo
+            {
+                DeviceId = info.SubjectId,
+                FeatureId = info.ResourceId,
+                Value = double.Parse(info.Value),
+                Time = TimeEx.UnixTimeFromTicks(info.TimeStamp),
+                StartTime = TimeEx.UnixTimeFromTicks(info.StartTimeZone),
+                EndTime = TimeEx.UnixTimeFromTicks(info.EndTimeZone),
+                ValueType = info.AggrType switch
+                { 
+                    0 => StatisticValueType.Difference,
+                    1 => StatisticValueType.Min,
+                    2 => StatisticValueType.Max,
+                    3 => StatisticValueType.Average,
+                    4 => StatisticValueType.Frequency,
+                    _ => (StatisticValueType)info.AggrType
+                },
+            })
+           .ToArray();
+    }
+}
+
+public enum FeatureStatisticAggregationDimension
+{
+    Interval30m,
+    Interval05h = Interval30m,
+    Interval1h,
+    Interval2h,
+    Interval3h,
+    Interval4h,
+    Interval5h,
+    Interval6h,
+    Interval12h,
+    Interval1d,
+    Interval24h = Interval1d,
+    Interval7d,
+    Interval30d
+}
+
+[Flags]
+public enum FeatureStatisticAggregationType : short
+{
+    Difference = 0b0_0001,
+    Min        = 0b0_0010,
+    Max        = 0b0_0100,
+    Average    = 0b0_1000,
+    Frequency  = 0b1_0000,
+    All        = 0b1_1111,
+    All2       = 0
 }
