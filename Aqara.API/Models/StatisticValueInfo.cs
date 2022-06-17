@@ -8,13 +8,15 @@ public class StatisticValueInfo
 
     public double Value { get; init; }
 
-    public DateTime Time { get; init; }
+    public DateTime? Time { get; init; }
 
     public DateTime StartTime { get; init; }
 
     public DateTime EndTime { get; init; }
 
     public StatisticValueType ValueType { get; init; }
+
+    public override string ToString() => $"{DeviceId}({FeatureId}:{ValueType})[{Time:dd.MM.yy HH:mm:ss}] {Value}";
 }
 
 public enum StatisticValueType

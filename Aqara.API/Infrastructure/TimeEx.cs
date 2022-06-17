@@ -1,4 +1,4 @@
-﻿namespace Aqara.API.Exceptions;
+﻿namespace Aqara.API.Infrastructure;
 
 public static class TimeEx
 {

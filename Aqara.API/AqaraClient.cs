@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
@@ -383,7 +384,7 @@ public class AqaraClient
 
         var data = new GetDeviceFeatureStatisticRequest(DeviceId, aggregation_type, features, start_time, end_time, dimension, Size);
 
-        var json_request = JsonSerializer.Serialize(data, new JsonSerializerOptions(__SerializerOptions) { WriteIndented = true });
+        //var json_request = JsonSerializer.Serialize(data, new JsonSerializerOptions(__SerializerOptions) { WriteIndented = true });
 
         var client = await GetClientWithAccessToken(Cancel);
 
@@ -391,7 +392,7 @@ public class AqaraClient
            .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
            .ConfigureAwait(false);
 
-        var result_json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        //var result_json = await response.Content.ReadAsStringAsync(Cancel).ConfigureAwait(false);
 
         var result = await response
            .EnsureSuccessStatusCode()
@@ -416,12 +417,12 @@ public class AqaraClient
             {
                 DeviceId = info.SubjectId,
                 FeatureId = info.ResourceId,
-                Value = double.Parse(info.Value),
-                Time = TimeEx.UnixTimeFromTicks(info.TimeStamp),
+                Value = double.Parse(info.Value, CultureInfo.InvariantCulture),
+                Time = info.TimeStamp is { } time_stamp ? TimeEx.UnixTimeFromTicks(time_stamp) : null,
                 StartTime = TimeEx.UnixTimeFromTicks(info.StartTimeZone),
                 EndTime = TimeEx.UnixTimeFromTicks(info.EndTimeZone),
                 ValueType = info.AggrType switch
-                { 
+                {
                     0 => StatisticValueType.Difference,
                     1 => StatisticValueType.Min,
                     2 => StatisticValueType.Max,

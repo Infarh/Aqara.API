@@ -46,7 +46,7 @@ try
 
     //var token_info = await client.ObtainAccessToken(config["Aqara:VerificationCode"], config["Aqara:Account"]);
 
-    var token = await client.RefreshAccessToken();
+    //var token = await client.RefreshAccessToken();
 
     //var positions = await client.GetPositions();
     //var devices = await client.GetDevicesByPosition("real1.930999863490531328");
@@ -61,7 +61,7 @@ try
         device_id, 
         new[] { resource_temperature }, 
         FeatureStatisticAggregationType.Average, 
-        DateTime.Now.AddDays(5));
+        DateTime.Now.AddDays(-5));
 }
 catch (AqaraAPIException error)
 {

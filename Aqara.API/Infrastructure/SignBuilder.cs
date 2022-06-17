@@ -1,7 +1,5 @@
 ﻿using System.Text;
 
-using Aqara.API.Exceptions;
-
 namespace Aqara.API.Infrastructure;
 
 public readonly ref struct SignBuilder

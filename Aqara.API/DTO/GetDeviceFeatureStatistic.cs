@@ -1,41 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-using Aqara.API.Exceptions;
+using Aqara.API.Infrastructure;
 
 namespace Aqara.API.DTO;
-
-public class Rootobject
-{
-    [JsonPropertyName("intent")]
-    public string Intent => Addresses.Resource.QueryTheStatisticalHistoryValueOfTheDeviceAttribute;
-
-    [JsonPropertyName("data")]
-    public GetDeviceFeatureStatisticRequestData Data { get; }
-
-    public class GetDeviceFeatureStatisticRequestData
-    {
-        [JsonPropertyName("")]
-        public RequestResources Resources { get; }
-
-        [JsonPropertyName("")]
-        public string StartTime { get; }
-
-        [JsonPropertyName("")]
-        public string Dimension { get; }
-
-        public class RequestResources
-        {
-            [JsonPropertyName("")]
-            public string subjectId { get; }
-
-            [JsonPropertyName("")]
-            public int[] aggrType { get; }
-
-            [JsonPropertyName("")]
-            public string[] resourceIds { get; }
-        }
-    }
-}
 
 public class GetDeviceFeatureStatisticRequest
 {
@@ -124,34 +91,34 @@ public class GetDeviceFeatureStatisticResponse : Response
 
     public class GetDeviceFeatureStatisticResponseResult
     {
-        [JsonPropertyName("scanId")]
-        public string? ScanId { get; init; }
-
         [JsonPropertyName("data")]
-        public FeatureInfo[] Data { get; init; } = null!;
+        public GetDeviceFeatureStatisticResponseResultData[] Data { get; init; } = null!;
 
-        public class FeatureInfo
+        [JsonPropertyName("scanId")]
+        public string ScanId { get; init; } = null!;
+
+        public class GetDeviceFeatureStatisticResponseResultData
         {
-            [JsonPropertyName("subjectId")]
-            public string SubjectId { get; init; } = null!;
+            [JsonPropertyName("timeStamp")]
+            public long? TimeStamp { get; init; }
 
             [JsonPropertyName("resourceId")]
             public string ResourceId { get; init; } = null!;
 
-            [JsonPropertyName("value")]
-            public string Value { get; init; } = null!;
-
-            [JsonPropertyName("timeStamp")]
-            public long TimeStamp { get; init; }
-
-            [JsonPropertyName("startTimeZone")]
-            public long StartTimeZone { get; init; }
-
             [JsonPropertyName("endTimeZone")]
             public long EndTimeZone { get; init; }
 
+            [JsonPropertyName("value")]
+            public string Value { get; init; } = null!;
+
+            [JsonPropertyName("subjectId")]
+            public string SubjectId { get; init; } = null!;
+
             [JsonPropertyName("aggrType")]
             public int AggrType { get; init; }
+
+            [JsonPropertyName("startTimeZone")]
+            public long StartTimeZone { get; init; }
         }
     }
 }
