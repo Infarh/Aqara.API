@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Aqara.API.DTO;
 using Aqara.API.Tests.Models;
-
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting.Extensions;
 
 using Moq;
@@ -14,6 +14,31 @@ namespace Aqara.API.Tests;
 [TestClass]
 public class AqaraClientTests
 {
+    private class TestLogger : ILogger<AqaraClient>
+    {
+        private readonly List<(LogLevel Level, EventId Id, string Meesage, Exception? Error)> _Log;
+
+        public TestLogger(List<(LogLevel Level, EventId Id, string Meesage, Exception? Error)> Log) => _Log = Log;
+
+        public IDisposable BeginScope<TState>(TState state) => null!;
+
+        public bool IsEnabled(LogLevel Level) => true;
+
+        public void Log<TState>(
+            LogLevel Level,
+            EventId Id,
+            TState State,
+            Exception? Exception,
+            Func<TState, Exception?, string> Formatter) =>
+            _Log.Add((Level, Id, Formatter(State, Exception), Exception));
+    }
+
+    private List<(LogLevel Level, EventId Id, string Meesage, Exception? Error)> _Log = new();
+    private ILogger<AqaraClient> _Logger;
+
+    [TestInitialize]
+    public void Initialize() => _Logger = new TestLogger(_Log);
+
     [TestMethod]
     public async Task RequestAuthorizationKey_Test()
     {
@@ -92,7 +117,7 @@ public class AqaraClientTests
             return response;
         }
 
-        var client = new AqaraClient(http, token_store_mock.Object, new AqaraClientConfig
+        var client = new AqaraClient(http, token_store_mock.Object, _Logger, new AqaraClientConfig
         {
             TokenStorageFile = "access_token.json",
             AppId = app_id,

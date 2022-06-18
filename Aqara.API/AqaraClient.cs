@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http.Json;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -11,9 +11,7 @@ using Aqara.API.Exceptions;
 using Aqara.API.Infrastructure;
 using Aqara.API.Models;
 
-using Microsoft.Extensions.Options;
-
-using static Aqara.API.Addresses;
+using Microsoft.Extensions.Logging;
 
 namespace Aqara.API;
 
@@ -27,27 +25,35 @@ public class AqaraClient
     private readonly HttpClient _Client;
     private readonly AqaraClientConfig _Configuration;
     private readonly IAccessTokenSource _AccessTokenSource;
+    private readonly ILogger<AqaraClient> _Logger;
 
     private HttpClient GetClient(string? AccessToken = null) => _Client.AddHeaders(_Configuration, AccessToken);
 
-    public AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource, AqaraClientConfig Configuration)
+    public AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource, ILogger<AqaraClient> Logger, AqaraClientConfig Configuration)
     {
         _Client = Client;
         _Configuration = Configuration;
         _AccessTokenSource = AccessTokenSource;
+        _Logger = Logger;
     }
 
     private async Task<HttpClient> GetClientWithAccessToken(CancellationToken Cancel)
     {
-        if(await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false) is not { } token) 
+        if (await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false) is not { } token)
             throw new InvalidOperationException("Отсутствует токен доступа");
 
-        if (!token.IsExpire) 
+        if (!token.IsExpire)
             return GetClient(token.AccessToken).AddAccessToken(token);
 
+        if (_Logger.IsEnabled(LogLevel.Trace))
+            _Logger.LogTrace("Токен доступа устарел");
+
         token = await RefreshAccessToken(Cancel).ConfigureAwait(false);
-        if(token is null || token.IsExpire)
+        if (token is null || token.IsExpire)
+        {
+            _Logger.LogError("Не удалось выполнить обновление токена доступа");
             throw new InvalidOperationException("Не удалось обновить токен доступа");
+        }
 
         await _AccessTokenSource.SetAccessToken(token, Cancel);
 
@@ -62,10 +68,12 @@ public class AqaraClient
     {
         var data = new AuthorizationCodeRequest(Account, AccessTokenValidity, AccountType);
 
+        var timer = Stopwatch.StartNew();
         var result = await GetClient()
            .PostAsJsonAsync("", data, Cancel)
            .GetJsonResult<AuthorizationCodeResponse>(Cancel)
            .ConfigureAwait(false);
+        timer.Stop();
 
         if (result is null)
             throw new RequestAuthorizationCodeException("Не удалось получить ответ от сервера")
@@ -80,7 +88,12 @@ public class AqaraClient
                 ResponseData = result,
             };
 
-        return result.Result!.AuthorizationCode;
+        if (_Logger.IsEnabled(LogLevel.Information))
+            _Logger.LogInformation("Запрос кода авторизации выполнен успешно за {0}мс", timer.ElapsedMilliseconds);
+
+        return result
+           .Result!
+           .AuthorizationCode;
     }
 
     public async Task<AccessTokenInfo> ObtainAccessToken(
@@ -91,14 +104,21 @@ public class AqaraClient
     {
         var data = new AccessTokenRequest(VerificationCode, Account, AccountType);
 
-        var response = await GetClient()
+        var timer = Stopwatch.StartNew();
+        var result = await GetClient()
            .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .GetJsonResult<AccessTokenResponse>(Cancel)
            .ConfigureAwait(false);
+        timer.Stop();
 
-        var result = await response
-           .EnsureSuccessStatusCode()
-           .Content
-           .ReadFromJsonAsync<AccessTokenResponse>(cancellationToken: Cancel);
+        //var response = await GetClient()
+        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+        //   .ConfigureAwait(false);
+
+        //var result = await response
+        //   .EnsureSuccessStatusCode()
+        //   .Content
+        //   .ReadFromJsonAsync<AccessTokenResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new RequestAccessTokenException("Не удалось получить ответ от сервера")
@@ -120,6 +140,10 @@ public class AqaraClient
 
         var token = new AccessTokenInfo(access_token, refresh_token, expire, open_id, DateTime.Now);
 
+        if (_Logger.IsEnabled(LogLevel.Information))
+            _Logger.LogInformation("Токен доступа получен за {0}мс. Время жизни {1}c (до {2})",
+                timer.ElapsedMilliseconds, token.Expires, token.ExpiresTime);
+
         await _AccessTokenSource.SetAccessToken(token, Cancel).ConfigureAwait(false);
 
         return token;
@@ -128,18 +152,28 @@ public class AqaraClient
     public async Task<AccessTokenInfo> RefreshAccessToken(CancellationToken Cancel = default)
     {
         if (await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false) is not { } token)
+        {
+            _Logger.LogError("Не удалось получить токен обновления токена доступа");
             throw new InvalidOperationException("Невозможно обновить токен авторизации потом, что отсутствует информация о старом токене авторизации");
+        }
 
         var data = new RefreshAccessTokenRequest(token.RefreshToken);
 
-        var response = await GetClient()
+        var timer = Stopwatch.StartNew();
+        var result = await GetClient()
            .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .GetJsonResult<RefreshAccessTokenResponse>(Cancel)
            .ConfigureAwait(false);
+        timer.Stop();
 
-        var result = await response
-           .EnsureSuccessStatusCode()
-           .Content
-           .ReadFromJsonAsync<RefreshAccessTokenResponse>(cancellationToken: Cancel);
+        //var response = await GetClient()
+        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+        //   .ConfigureAwait(false);
+
+        //var result = await response
+        //   .EnsureSuccessStatusCode()
+        //   .Content
+        //   .ReadFromJsonAsync<RefreshAccessTokenResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new RefreshAccessTokenException("Не удалось получить ответ от сервера")
@@ -161,6 +195,10 @@ public class AqaraClient
 
         var result_token = new AccessTokenInfo(access_token, refresh_token, expire, open_id, DateTime.Now);
 
+        if (_Logger.IsEnabled(LogLevel.Information))
+            _Logger.LogInformation("Токен доступа обновлён за {0}мс. Полученный токен истекает через {1}с ({2})",
+                timer.ElapsedMilliseconds, result_token.Expires, result_token.ExpiresTime);
+
         return await _AccessTokenSource.SetAccessToken(result_token, Cancel);
     }
 
@@ -170,14 +208,21 @@ public class AqaraClient
 
         var client = await GetClientWithAccessToken(Cancel);
 
-        var response = await client
+        var timer = Stopwatch.StartNew();
+        var result = await client
            .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .GetJsonResult<GetPositionsResponse>(Cancel)
            .ConfigureAwait(false);
+        timer.Stop();
 
-        var result = await response
-           .EnsureSuccessStatusCode()
-           .Content
-           .ReadFromJsonAsync<GetPositionsResponse>(cancellationToken: Cancel);
+        //var response = await client
+        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+        //   .ConfigureAwait(false);
+
+        //var result = await response
+        //   .EnsureSuccessStatusCode()
+        //   .Content
+        //   .ReadFromJsonAsync<GetPositionsResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new GetPositionsException("Не удалось получить ответ от сервера")
@@ -192,7 +237,17 @@ public class AqaraClient
                 ResponseData = result,
             };
 
-        return result.Result.Data
+        if(_Logger.IsEnabled(LogLevel.Information))
+            if(ParentPositionId is null)
+                _Logger.LogInformation("Запрос местоположений выполнен успешно за {0}мс. Получено мест {1}. Всего мест {2}",
+                    timer.ElapsedMilliseconds, result.Result.Data.Length, result.Result.TotalCount);
+            else
+                _Logger.LogInformation("Запрос местоположений для родительского положения {0} выполнен успешно за {1}мс. Получено мест {2}. Всего мест {3}",
+                    ParentPositionId, timer.ElapsedMilliseconds, result.Result.Data.Length, result.Result.TotalCount);
+
+        return result
+           .Result
+           .Data
            .Select(position => new PositionInfo
            {
                PositionId = position.PositionId,
@@ -208,18 +263,23 @@ public class AqaraClient
     {
         var data = new GetDevicesByPositionRequest(PositionId, Page, PageSize);
 
-        var json_request = JsonSerializer.Serialize(data);
-
         var client = await GetClientWithAccessToken(Cancel);
 
-        var response = await client
+        var timer = Stopwatch.StartNew();
+        var result = await client
            .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .GetJsonResult<GetDevicesByPositionResponse>(Cancel)
            .ConfigureAwait(false);
+        timer.Stop();
 
-        var result = await response
-           .EnsureSuccessStatusCode()
-           .Content
-           .ReadFromJsonAsync<GetDevicesByPositionResponse>(cancellationToken: Cancel);
+        //var response = await client
+        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+        //   .ConfigureAwait(false);
+
+        //var result = await response
+        //   .EnsureSuccessStatusCode()
+        //   .Content
+        //   .ReadFromJsonAsync<GetDevicesByPositionResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new GetDevicesByPositionException("Не удалось получить ответ от сервера")
@@ -234,7 +294,18 @@ public class AqaraClient
                 ResponseData = result,
             };
 
-        return result.Result.Data
+        if(_Logger.IsEnabled(LogLevel.Information))
+            if(PositionId is null)
+                _Logger.LogInformation("Запрос устройств выполнен успешно за {0}мс. Получено устройств {1}. Всего устройств {2}",
+                    timer.ElapsedMilliseconds,
+                    result.Result.Data.Length, result.Result.TotalCount);
+            else
+                _Logger.LogInformation("Запрос устройств для положения {0} выполнен успешно за {1}мс. Получено устройств {2}. Всего устройств {3}",
+                    PositionId, timer.ElapsedMilliseconds, result.Result.Data.Length, result.Result.TotalCount);
+
+        return result
+           .Result
+           .Data
            .Select(device => new DeviceInfo
            {
                Id = device.Id,
@@ -275,20 +346,23 @@ public class AqaraClient
     {
         var data = new GetDeviceModelFeaturesRequest(Model, ResourceId);
 
-        var json_request = JsonSerializer.Serialize(data);
-
         var client = await GetClientWithAccessToken(Cancel);
 
-        var response = await client
+        var timer = Stopwatch.StartNew();
+        var result = await client
            .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .GetJsonResult<GetDeviceModelFeaturesResponse>(Cancel)
            .ConfigureAwait(false);
+        timer.Stop();
 
-        //var result_json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        //var response = await client
+        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+        //   .ConfigureAwait(false);
 
-        var result = await response
-           .EnsureSuccessStatusCode()
-           .Content
-           .ReadFromJsonAsync<GetDeviceModelFeaturesResponse>(cancellationToken: Cancel);
+        //var result = await response
+        //   .EnsureSuccessStatusCode()
+        //   .Content
+        //   .ReadFromJsonAsync<GetDeviceModelFeaturesResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new GetDeviceModelFeaturesException("Не удалось получить ответ от сервера")
@@ -303,9 +377,18 @@ public class AqaraClient
                 ResponseData = result,
             };
 
-        return result.Result
+        if(_Logger.IsEnabled(LogLevel.Information))
+            if(ResourceId is null)
+                _Logger.LogInformation("Запрос параметров для модели {0} выполнен успешно за {1}мс. Получено параметров {2}.",
+                    Model, timer.ElapsedMilliseconds, result.Result.Length);
+            else
+                _Logger.LogInformation("Запрос параметров для модели {0} ({1}) выполнен успешно за {2}мс. Получено параметров {3}.",
+                    Model, ResourceId, timer.ElapsedMilliseconds, result.Result.Length);
+
+        return result
+           .Result
            .Select(info => new DeviceFeatureInfo
-            {
+           {
                ResourceId = info.ResourceId,
                Name = info.Name,
                NameEn = info.NameEn,
@@ -323,14 +406,14 @@ public class AqaraClient
                    0 => DeviceFeatureAccess.Read,
                    1 => DeviceFeatureAccess.Write,
                    2 => DeviceFeatureAccess.ReadWrite,
-                   _=> (DeviceFeatureAccess)info.Access
+                   _ => (DeviceFeatureAccess)info.Access
                },
-            })
+           })
            .ToArray();
     }
 
     public async Task<StatisticValueInfo[]> GetDeviceFeatureStatistic(
-        string DeviceId, 
+        string DeviceId,
         IEnumerable<string> FeatureId,
         FeatureStatisticAggregationType AggregationType,
         DateTime StartTime,
@@ -348,19 +431,19 @@ public class AqaraClient
         {
             aggregation_type = new List<int>();
 
-            if((AggregationType & FeatureStatisticAggregationType.Difference) == FeatureStatisticAggregationType.Difference)
+            if ((AggregationType & FeatureStatisticAggregationType.Difference) == FeatureStatisticAggregationType.Difference)
                 aggregation_type.Add(0);
 
-            if((AggregationType & FeatureStatisticAggregationType.Min) == FeatureStatisticAggregationType.Min)
+            if ((AggregationType & FeatureStatisticAggregationType.Min) == FeatureStatisticAggregationType.Min)
                 aggregation_type.Add(1);
 
-            if((AggregationType & FeatureStatisticAggregationType.Max) == FeatureStatisticAggregationType.Max)
+            if ((AggregationType & FeatureStatisticAggregationType.Max) == FeatureStatisticAggregationType.Max)
                 aggregation_type.Add(2);
 
-            if((AggregationType & FeatureStatisticAggregationType.Average) == FeatureStatisticAggregationType.Average)
+            if ((AggregationType & FeatureStatisticAggregationType.Average) == FeatureStatisticAggregationType.Average)
                 aggregation_type.Add(3);
 
-            if((AggregationType & FeatureStatisticAggregationType.Frequency) == FeatureStatisticAggregationType.Frequency)
+            if ((AggregationType & FeatureStatisticAggregationType.Frequency) == FeatureStatisticAggregationType.Frequency)
                 aggregation_type.Add(3);
         }
 
@@ -384,20 +467,23 @@ public class AqaraClient
 
         var data = new GetDeviceFeatureStatisticRequest(DeviceId, aggregation_type, features, start_time, end_time, dimension, Size);
 
-        //var json_request = JsonSerializer.Serialize(data, new JsonSerializerOptions(__SerializerOptions) { WriteIndented = true });
-
         var client = await GetClientWithAccessToken(Cancel);
 
-        var response = await client
+        var timer = Stopwatch.StartNew();
+        var result = await client
            .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .GetJsonResult<GetDeviceFeatureStatisticResponse>(Cancel)
            .ConfigureAwait(false);
+        timer.Stop();
 
-        //var result_json = await response.Content.ReadAsStringAsync(Cancel).ConfigureAwait(false);
+        //var response = await client
+        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+        //   .ConfigureAwait(false);
 
-        var result = await response
-           .EnsureSuccessStatusCode()
-           .Content
-           .ReadFromJsonAsync<GetDeviceFeatureStatisticResponse>(cancellationToken: Cancel);
+        //var result = await response
+        //   .EnsureSuccessStatusCode()
+        //   .Content
+        //   .ReadFromJsonAsync<GetDeviceFeatureStatisticResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new GetDeviceFeatureStatisticException("Не удалось получить ответ от сервера")
@@ -412,25 +498,95 @@ public class AqaraClient
                 ResponseData = result,
             };
 
-        return result.Result.Data
+        if(_Logger.IsEnabled(LogLevel.Information))
+            _Logger.LogInformation(
+                "Запрос статистики устройства {0} для параметров {1} выполнен успешно за {2}мс. " + 
+                "Интервал сбора статистики {3} - {4}. " + 
+                "Разрешающая способность {5}. " + 
+                "Тип значений {6}. " + 
+                "Размер выборки {7}. " + 
+                "Получено значений {8}.",
+                DeviceId,
+                string.Join(',', features), 
+                timer.ElapsedMilliseconds,
+                StartTime, EndTime ?? DateTime.Now,
+                Dimension, AggregationType, Size, 
+                result.Result.Data.Length);
+
+        return result
+           .Result
+           .Data
            .Select(info => new StatisticValueInfo
+           {
+               DeviceId = info.SubjectId,
+               FeatureId = info.ResourceId,
+               Value = double.Parse(info.Value, CultureInfo.InvariantCulture),
+               Time = info.TimeStamp is { } time_stamp ? TimeEx.UnixTimeFromTicks(time_stamp) : null,
+               StartTime = TimeEx.UnixTimeFromTicks(info.StartTimeZone),
+               EndTime = TimeEx.UnixTimeFromTicks(info.EndTimeZone),
+               ValueType = info.AggrType switch
+               {
+                   0 => StatisticValueType.Difference,
+                   1 => StatisticValueType.Min,
+                   2 => StatisticValueType.Max,
+                   3 => StatisticValueType.Average,
+                   4 => StatisticValueType.Frequency,
+                   _ => (StatisticValueType)info.AggrType
+               },
+           })
+           .ToArray();
+    }
+
+    public async Task<DeviceFeatureValue[]> GetDeviceFeatureValue((string DeviceId, string[] FeatureId)[] Features, CancellationToken Cancel = default)
+    {
+        var data = new GetDeviceFeatureValueRequest(Features);
+
+        var client = await GetClientWithAccessToken(Cancel);
+
+        var timer = Stopwatch.StartNew();
+        var result = await client
+           .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+           .GetJsonResult<GetDeviceFeatureValueResponse>(Cancel)
+           .ConfigureAwait(false);
+        timer.Stop();
+
+        //var response = await client
+        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
+        //   .ConfigureAwait(false);
+
+        //var result = await response
+        //   .EnsureSuccessStatusCode()
+        //   .Content
+        //   .ReadFromJsonAsync<GetDeviceFeatureValueResponse>(cancellationToken: Cancel);
+
+        if (result is null)
+            throw new GetDeviceFeatureValueException("Не удалось получить ответ от сервера")
             {
-                DeviceId = info.SubjectId,
-                FeatureId = info.ResourceId,
-                Value = double.Parse(info.Value, CultureInfo.InvariantCulture),
-                Time = info.TimeStamp is { } time_stamp ? TimeEx.UnixTimeFromTicks(time_stamp) : null,
-                StartTime = TimeEx.UnixTimeFromTicks(info.StartTimeZone),
-                EndTime = TimeEx.UnixTimeFromTicks(info.EndTimeZone),
-                ValueType = info.AggrType switch
-                {
-                    0 => StatisticValueType.Difference,
-                    1 => StatisticValueType.Min,
-                    2 => StatisticValueType.Max,
-                    3 => StatisticValueType.Average,
-                    4 => StatisticValueType.Frequency,
-                    _ => (StatisticValueType)info.AggrType
-                },
-            })
+                RequestData = data
+            };
+
+        if (result.ErrorCode != ErrorCode.Success)
+            throw new GetDeviceFeatureValueException($"Ошибка получения токена авторизации {result.Message} {result.MessageDetails}")
+            {
+                RequestData = data,
+                ResponseData = result,
+            };
+
+        if(_Logger.IsEnabled(LogLevel.Information))
+            _Logger.LogInformation("Запрос значений параметров ({1}) выполнен за {0}мс. Получено значений {2}",
+                timer.ElapsedMilliseconds,
+                string.Join(';', Features.Select(f => $"{f.DeviceId},{string.Join(',', f.FeatureId)}")),
+                result.Result.Length);
+
+        return result
+           .Result
+           .Select(value => new DeviceFeatureValue
+           {
+               DeviceId = value.DeviceId,
+               FeatureId = value.FeatureId,
+               Time = TimeEx.UnixTimeFromTicks(value.TimeStamp),
+               Value = double.Parse(value.Value, CultureInfo.InvariantCulture)
+           })
            .ToArray();
     }
 }
@@ -456,10 +612,10 @@ public enum FeatureStatisticAggregationDimension
 public enum FeatureStatisticAggregationType : short
 {
     Difference = 0b0_0001,
-    Min        = 0b0_0010,
-    Max        = 0b0_0100,
-    Average    = 0b0_1000,
-    Frequency  = 0b1_0000,
-    All        = 0b1_1111,
-    All2       = 0
+    Min = 0b0_0010,
+    Max = 0b0_0100,
+    Average = 0b0_1000,
+    Frequency = 0b1_0000,
+    All = 0b1_1111,
+    All2 = 0
 }

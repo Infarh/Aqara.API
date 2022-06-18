@@ -1,10 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
-using Aqara.API.DTO;
-using Aqara.API.Exceptions.Base;
+﻿using Aqara.API.Exceptions.Base;
 using Aqara.API.TestConsole.Infrastructure.Extensions;
 
 using Microsoft.Extensions.Configuration;
@@ -57,11 +51,13 @@ try
     //var resources = await client.GetDeviceModelFeatures(device_model_id);
 
     const string resource_temperature = "0.1.85";
-    var values = await client.GetDeviceFeatureStatistic(
-        device_id, 
-        new[] { resource_temperature }, 
-        FeatureStatisticAggregationType.Average, 
-        DateTime.Now.AddDays(-5));
+    //var values = await client.GetDeviceFeatureStatistic(
+    //    device_id, 
+    //    new[] { resource_temperature }, 
+    //    FeatureStatisticAggregationType.Average, 
+    //    DateTime.Now.AddDays(-5));
+
+    var value = await client.GetDeviceFeatureValue(new[] { ("lumi.158d00071102f1", new[] { "0.1.85" }) });
 }
 catch (AqaraAPIException error)
 {
