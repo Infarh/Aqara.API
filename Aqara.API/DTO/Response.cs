@@ -5,21 +5,21 @@ namespace Aqara.API.DTO;
 public abstract class Response
 {
     [JsonPropertyName("code")]
-    public int Code { get; init; }
+    public int Code { get; set; }
 
     [JsonIgnore]
     public ErrorCode ErrorCode => (ErrorCode)Code;
 
     [JsonPropertyName("requestId")]
-    public string RequestId { get; init; } = null!;
+    public string RequestId { get; set; } = null!;
 
     [JsonPropertyName("message")]
-    public string Message { get; init; } = null!;
+    public string Message { get; set; } = null!;
 
     [JsonPropertyName("msgDetails")]
     //[JsonPropertyName("messageDetail")]
-    public string? MessageDetails { get; init; }
+    public string? MessageDetails { get; set; }
 
     [JsonPropertyName("messageDetail")]
-    public string? OtherMessages { get; init; }
+    public string? OtherMessages { get; set; }
 }

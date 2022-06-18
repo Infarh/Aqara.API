@@ -2,9 +2,9 @@
 
 public class DeviceFeatureValue
 {
-    public string DeviceId { get; init; }
+    public string DeviceId { get; init; } = null!;
 
-    public string FeatureId { get; init; }
+    public string FeatureId { get; init; } = null!;
 
     public DateTime Time { get; init; }
 

@@ -4,6 +4,8 @@ namespace Aqara.API.DTO;
 
 public class GetDevicesByPositionRequest
 {
+    public GetDevicesByPositionRequest() { }
+
     public GetDevicesByPositionRequest(string? PositionId, int? PageNum, int? PageSize) =>
         Data = new(PositionId, PageNum, PageSize);
 
@@ -11,14 +13,16 @@ public class GetDevicesByPositionRequest
     public string Intent => Addresses.Device.QueryDeviceInformation;
 
     [JsonPropertyName("dids")]
-    public List<string>? DevicesIds { get; init; } = new();
+    public List<string>? DevicesIds { get; set; } = new();
 
     [JsonPropertyName("data")]
-    public GetDevicesRequestData Data { get; }
+    public GetDevicesRequestData Data { get; set; } = null!;
 
     public class GetDevicesRequestData
     {
-        internal GetDevicesRequestData(string? PositionId, int? PageNum, int? PageSize)
+        public GetDevicesRequestData() { }
+
+        public GetDevicesRequestData(string? PositionId, int? PageNum, int? PageSize)
         {
             this.PositionId = PositionId;
             this.PageNum = PageNum;
@@ -26,13 +30,13 @@ public class GetDevicesByPositionRequest
         }
 
         [JsonPropertyName("parentPositionId")]
-        public string? PositionId { get; }
+        public string? PositionId { get; set; }
 
         [JsonPropertyName("pageNum")]
-        public int? PageNum { get; }
+        public int? PageNum { get; set; }
 
         [JsonPropertyName("pageSize")]
-        public int? PageSize { get; }
+        public int? PageSize { get; set; }
 
         public override string ToString() => $"pos:{(PositionId is { Length: > 0 } pos ? pos : "all")},page:{PageNum ?? 1},size:{PageSize ?? 30}";
     }
@@ -43,50 +47,50 @@ public class GetDevicesByPositionRequest
 public class GetDevicesByPositionResponse : Response
 {
     [JsonPropertyName("result")]
-    public GetDevicesResponseResult Result { get; init; } = null!;
+    public GetDevicesResponseResult Result { get; set; } = null!;
 
     public class GetDevicesResponseResult
     {
         [JsonPropertyName("totalCount")]
-        public int TotalCount { get; init; }
+        public int TotalCount { get; set; }
 
         [JsonPropertyName("data")]
-        public PositionInfo[] Data { get; init; } = null!;
+        public PositionInfo[] Data { get; set; } = null!;
 
         public class PositionInfo
         {
             [JsonPropertyName("did")]
-            public string Id { get; init; } = null!;
+            public string Id { get; set; } = null!;
 
             [JsonPropertyName("parentDid")]
-            public string ParentId { get; init; } = null!;
+            public string ParentId { get; set; } = null!;
 
             [JsonPropertyName("positionId")]
-            public string PositionId { get; init; } = null!;
+            public string PositionId { get; set; } = null!;
 
             [JsonPropertyName("createTime")]
-            public long CreateTime { get; init; }
+            public long CreateTime { get; set; }
 
             [JsonPropertyName("timeZone")]
-            public string TimeZone { get; init; } = null!;
+            public string TimeZone { get; set; } = null!;
 
             [JsonPropertyName("model")]
-            public string Model { get; init; } = null!;
+            public string Model { get; set; } = null!;
 
             [JsonPropertyName("updateTime")]
-            public long UpdateTime { get; init; }
+            public long UpdateTime { get; set; }
 
             [JsonPropertyName("modelType")]
-            public int ModelType { get; init; }
+            public int ModelType { get; set; }
 
             [JsonPropertyName("state")]
-            public int State { get; init; }
+            public int State { get; set; }
 
             [JsonPropertyName("firmwareVersion")]
-            public string FirmwareVersion { get; init; } = null!;
+            public string FirmwareVersion { get; set; } = null!;
 
             [JsonPropertyName("deviceName")]
-            public string DeviceName { get; init; } = null!;
+            public string DeviceName { get; set; } = null!;
 
             public override string ToString() => $"{Id}:{DeviceName}(type:{Model})online:{(Model == "1")}";
         }

@@ -9,7 +9,13 @@ public record AccessTokenInfo(string AccessToken, string RefreshToken, int Expir
     public DateTime ExpiresTime => CreationTime.AddSeconds(Expires);
 
     [JsonIgnore]
+    public DateTime RefreshTokenExpire => CreationTime.AddDays(30);
+
+    [JsonIgnore]
     public bool IsExpire => DateTime.Now > ExpiresTime;
+
+    [JsonIgnore]
+    public bool IsRefreshTokenExpire => DateTime.Now > RefreshTokenExpire;
 
     public static async Task<AccessTokenInfo?> ReadFromFileAsync(string FileName, CancellationToken Cancel = default)
     {

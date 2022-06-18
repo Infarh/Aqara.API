@@ -4,6 +4,8 @@ namespace Aqara.API.DTO;
 
 public class GetPositionsRequest
 {
+    public GetPositionsRequest() { }
+
     public GetPositionsRequest(string? ParentPositionId, int? PageNum, int? PageSize) =>
         Data = new(ParentPositionId, PageNum, PageSize);
 
@@ -11,11 +13,13 @@ public class GetPositionsRequest
     public string Intent => Addresses.Position.QueryTheSubordinatePositionInformationOfTheCurrentParentPosition;
 
     [JsonPropertyName("data")]
-    public GetPositionsRequestData Data { get; }
+    public GetPositionsRequestData Data { get; set; } = null!;
 
     public class GetPositionsRequestData
     {
-        internal GetPositionsRequestData(string? ParentPositionId, int? PageNum, int? PageSize)
+        public GetPositionsRequestData() { }
+
+        public GetPositionsRequestData(string? ParentPositionId, int? PageNum, int? PageSize)
         {
             this.ParentPositionId = ParentPositionId;
             this.PageNum = PageNum;
@@ -23,45 +27,45 @@ public class GetPositionsRequest
         }
 
         [JsonPropertyName("parentPositionId")]
-        public string? ParentPositionId { get; }
+        public string? ParentPositionId { get; set; }
 
         [JsonPropertyName("pageNum")]
-        public int? PageNum { get; }
+        public int? PageNum { get; set; }
 
         [JsonPropertyName("pageSize")]
-        public int? PageSize { get; }
+        public int? PageSize { get; set; }
     }
 }
 
 public class GetPositionsResponse : Response
 {
     [JsonPropertyName("result")]
-    public GetPositionsResponseResult Result { get; init; } = null!;
+    public GetPositionsResponseResult Result { get; set; } = null!;
 
     public class GetPositionsResponseResult
     {
         [JsonPropertyName("totalCount")]
-        public int TotalCount { get; init; }
+        public int TotalCount { get; set; }
 
         [JsonPropertyName("data")]
-        public PositionInfo[] Data { get; init; }
+        public ICollection<GetPositionsResponseResultData> Data { get; set; } = null!;
 
-        public class PositionInfo
+        public class GetPositionsResponseResultData
         {
             [JsonPropertyName("positionName")]
-            public string Name { get; init; } = null!;
+            public string Name { get; set; } = null!;
 
             [JsonPropertyName("positionId")]
-            public string PositionId { get; init; } = null!;
+            public string PositionId { get; set; } = null!;
 
             [JsonPropertyName("createTime")]
-            public long CreateTime { get; init; }
+            public long CreateTime { get; set; }
 
             [JsonPropertyName("description")]
-            public string Description { get; init; } = null!;
+            public string Description { get; set; } = null!;
 
             [JsonPropertyName("parentPositionId")]
-            public string ParentPositionId { get; init; } = null!;
+            public string ParentPositionId { get; set; } = null!;
         }
     }
 }

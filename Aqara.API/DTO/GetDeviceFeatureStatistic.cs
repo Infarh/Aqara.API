@@ -6,6 +6,8 @@ namespace Aqara.API.DTO;
 
 public class GetDeviceFeatureStatisticRequest
 {
+    public GetDeviceFeatureStatisticRequest() { }
+
     public GetDeviceFeatureStatisticRequest(
         string DeviceName,
         IReadOnlyCollection<int>? AggregationType,
@@ -25,11 +27,13 @@ public class GetDeviceFeatureStatisticRequest
     public string Intent => Addresses.Resource.QueryTheStatisticalHistoryValueOfTheDeviceAttribute;
 
     [JsonPropertyName("data")]
-    public GetDeviceFeatureStatisticRequestData Data { get; }
+    public GetDeviceFeatureStatisticRequestData Data { get; set; } = null!;
 
     public class GetDeviceFeatureStatisticRequestData
     {
-        internal GetDeviceFeatureStatisticRequestData(
+        public GetDeviceFeatureStatisticRequestData() { }
+
+        public GetDeviceFeatureStatisticRequestData(
             string SubjectId,
             IReadOnlyCollection<int>? AggrType,
             IReadOnlyCollection<string> ResourceIds,
@@ -46,22 +50,24 @@ public class GetDeviceFeatureStatisticRequest
         }
 
         [JsonPropertyName("startTime")]
-        public string StartTime { get; }
+        public string StartTime { get; set; } = null!;
 
         [JsonPropertyName("endTime")]
-        public string? EndTime { get; }
+        public string? EndTime { get; set; }
 
         [JsonPropertyName("dimension")]
-        public string Dimension { get; }
+        public string Dimension { get; set; } = null!;
 
         [JsonPropertyName("size")]
-        public int? Size { get; }
+        public int? Size { get; set; }
 
         [JsonPropertyName("resources")]
-        public RequestResources Resources { get; }
+        public RequestResources Resources { get; set; } = null!;
 
         public class RequestResources
         {
+            public RequestResources() { }
+
             public RequestResources(
                 string SubjectId,
                 IReadOnlyCollection<int>? AggrType,
@@ -73,13 +79,13 @@ public class GetDeviceFeatureStatisticRequest
             }
 
             [JsonPropertyName("subjectId")]
-            public string SubjectId { get; }
+            public string SubjectId { get; set; } = null!;
 
             [JsonPropertyName("aggrType")]
-            public IReadOnlyCollection<int>? AggrType { get; }
+            public IReadOnlyCollection<int>? AggrType { get; set; }
 
             [JsonPropertyName("resourceIds")]
-            public IReadOnlyCollection<string> ResourceIds { get; }
+            public IReadOnlyCollection<string> ResourceIds { get; set; } = null!;
         }
     }
 }
@@ -87,38 +93,38 @@ public class GetDeviceFeatureStatisticRequest
 public class GetDeviceFeatureStatisticResponse : Response
 {
     [JsonPropertyName("result")]
-    public GetDeviceFeatureStatisticResponseResult Result { get; init; } = null!;
+    public GetDeviceFeatureStatisticResponseResult Result { get; set; } = null!;
 
     public class GetDeviceFeatureStatisticResponseResult
     {
         [JsonPropertyName("data")]
-        public GetDeviceFeatureStatisticResponseResultData[] Data { get; init; } = null!;
+        public GetDeviceFeatureStatisticResponseResultData[] Data { get; set; } = null!;
 
         [JsonPropertyName("scanId")]
-        public string ScanId { get; init; } = null!;
+        public string ScanId { get; set; } = null!;
 
         public class GetDeviceFeatureStatisticResponseResultData
         {
             [JsonPropertyName("timeStamp")]
-            public long? TimeStamp { get; init; }
+            public long? TimeStamp { get; set; }
 
             [JsonPropertyName("resourceId")]
-            public string ResourceId { get; init; } = null!;
+            public string ResourceId { get; set; } = null!;
 
             [JsonPropertyName("endTimeZone")]
-            public long EndTimeZone { get; init; }
+            public long EndTimeZone { get; set; }
 
             [JsonPropertyName("value")]
-            public string Value { get; init; } = null!;
+            public string Value { get; set; } = null!;
 
             [JsonPropertyName("subjectId")]
-            public string SubjectId { get; init; } = null!;
+            public string SubjectId { get; set; } = null!;
 
             [JsonPropertyName("aggrType")]
-            public int AggrType { get; init; }
+            public int AggrType { get; set; }
 
             [JsonPropertyName("startTimeZone")]
-            public long StartTimeZone { get; init; }
+            public long StartTimeZone { get; set; }
         }
     }
 }

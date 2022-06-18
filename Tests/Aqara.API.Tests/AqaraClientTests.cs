@@ -125,7 +125,7 @@ public class AqaraClientTests
             AppKey = app_key,
         });
 
-        var result = await client.RequestAuthorizationKey(account);
+        var result = await client.GetAuthorizationKey(account);
 
         result.AssertEquals(response_authorization_code);
     }

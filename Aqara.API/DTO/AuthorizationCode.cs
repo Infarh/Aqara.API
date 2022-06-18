@@ -7,6 +7,8 @@ namespace Aqara.API.DTO;
 
 public class AuthorizationCodeRequest
 {
+    public AuthorizationCodeRequest() { }
+
     public AuthorizationCodeRequest(string Account, string AccessTokenValidity = "1h", AccountType AccountType = AccountType.Aqara)
     {
         var access_token_validity = AccessTokenValidity.AsSpan();
@@ -39,11 +41,13 @@ public class AuthorizationCodeRequest
     public string Intent => Addresses.Auth.GetAuthorizationVerificationCode;
 
     [JsonPropertyName("data")]
-    public AuthorizationCodeRequestData Data { get; }
+    public AuthorizationCodeRequestData Data { get; set; } = null!;
 
     public class AuthorizationCodeRequestData
     {
-        internal AuthorizationCodeRequestData(string Account, string AccessTokenValidity, int AccountType)
+        public AuthorizationCodeRequestData() { }
+
+        public AuthorizationCodeRequestData(string Account, string AccessTokenValidity, int AccountType)
         {
             this.Account = Account;
             this.AccountType = AccountType;
@@ -51,13 +55,13 @@ public class AuthorizationCodeRequest
         }
 
         [JsonPropertyName("account")]
-        public string Account { get; }
+        public string Account { get; set; } = null!;
 
         [JsonPropertyName("accountType")]
-        public int AccountType { get; }
+        public int AccountType { get; set; }
 
         [JsonPropertyName("AccessTokenValidity")]
-        public string AccessTokenValidity { get; }
+        public string AccessTokenValidity { get; set; } = null!;
 
         public override string ToString() => $"account:{Account},validity:{AccessTokenValidity}";
     }
@@ -68,12 +72,12 @@ public class AuthorizationCodeRequest
 public class AuthorizationCodeResponse : Response
 {
     [JsonPropertyName("result")]
-    public AuthorizationResult? Result { get; init; }
+    public AuthorizationResult? Result { get; set; }
 
     public class AuthorizationResult
     {
         [JsonPropertyName("authCode")]
-        public string? AuthorizationCode { get; init; }
+        public string? AuthorizationCode { get; set; }
     }
 
     public override string ToString() => $"code:{Code}({ErrorCode}),msg:{Message}";

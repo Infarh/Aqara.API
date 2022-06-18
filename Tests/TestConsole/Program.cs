@@ -1,4 +1,9 @@
-﻿using Aqara.API.Exceptions.Base;
+﻿using System.Text.Json;
+
+using Aqara.API.DTO;
+using Aqara.API.Exceptions.Base;
+using Aqara.API.TestConsole;
+using Aqara.API.TestConsole.Infrastructure;
 using Aqara.API.TestConsole.Infrastructure.Extensions;
 
 using Microsoft.Extensions.Configuration;
@@ -25,6 +30,8 @@ var host = Host.CreateDefaultBuilder(args)
 
         Services.AddSingleton<IAccessTokenSource>(_ => new AccessTokenFileSource("AccessToken.json"));
         Services.AddHttpClient<AqaraClient>("Aqara", (s, client) => client.BaseAddress = new(s.GetConfigValue("Aqara:Address")));
+
+        Services.Configure<JsonSerializerOptions>(opt => opt.AddContext<DTOSerializerContext>());
     })
    .Build();
 
@@ -36,9 +43,9 @@ var client = host.Services.GetRequiredService<AqaraClient>();
 
 try
 {
-    //var code = await client.RequestAuthorizationKey(config["Aqara:Account"], "24h");
+    //var code = await client.GetAuthorizationKey(config["Aqara:Account"], "24h");
 
-    //var token_info = await client.ObtainAccessToken(config["Aqara:VerificationCode"], config["Aqara:Account"]);
+    //var token_info = await client.GetAccessToken(config["Aqara:VerificationCode"], config["Aqara:Account"]);
 
     //var token = await client.RefreshAccessToken();
 
@@ -46,18 +53,25 @@ try
     //var devices = await client.GetDevicesByPosition("real1.930999863490531328");
     //var devices = await client.GetDevicesByPosition("real1.930999863490531328");
 
-    const string device_id = "lumi.158d00071102f1";
-    const string device_model_id = "lumi.weather.v1";
+    const string termometr_id = "lumi.158d00071102f1";
+    const string termometr_model_id = "lumi.weather.v1";
     //var resources = await client.GetDeviceModelFeatures(device_model_id);
 
     const string resource_temperature = "0.1.85";
     //var values = await client.GetDeviceFeatureStatistic(
-    //    device_id, 
+    //    termometr_id, 
     //    new[] { resource_temperature }, 
     //    FeatureStatisticAggregationType.Average, 
     //    DateTime.Now.AddDays(-5));
 
-    var value = await client.GetDeviceFeatureValue(new[] { ("lumi.158d00071102f1", new[] { "0.1.85" }) });
+    //var value = await client.GetDevicesFeaturesValues(new[] { ("lumi.158d00071102f1", new[] { "0.1.85" }) });
+    //var value = await client.GetDeviceFeatureValue(termometr_id, resource_temperature);
+
+    const string switch_id = "lumi.54ef4410001c67a8";
+    //const string switch_model_id = "lumi.switch.l1aeu1";
+    const string switch_feature_id = "4.1.85";
+
+    await client.SetDevicesFeaturesValues(new[] { (switch_id, new[] { (switch_feature_id, 1d) }) });
 }
 catch (AqaraAPIException error)
 {
