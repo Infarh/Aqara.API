@@ -3,6 +3,7 @@
 public interface IAccessTokenSource
 {
     ValueTask<AccessTokenInfo?> GetAccessToken(CancellationToken Cancel = default);
+
     ValueTask<AccessTokenInfo> SetAccessToken(AccessTokenInfo Token, CancellationToken Cancel = default);
 }
 

@@ -20,6 +20,7 @@ using Microsoft.Extensions.Options;
 //};
 
 var host = Host.CreateDefaultBuilder(args)
+   .UseConsoleLifetime(opt => opt.SuppressStatusMessages = true)
    .ConfigureAppConfiguration(cfg => cfg
        .AddUserSecrets(typeof(Program).Assembly)
        .AddCommandLine(args))
@@ -27,7 +28,6 @@ var host = Host.CreateDefaultBuilder(args)
     {
         Services.AddOptions<AqaraClientConfig>()
            .Bind(env.Configuration.GetSection("Aqara"))
-           .Validate(o => o.TokenStorageFile is { Length: > 0 }, "Не задан путь к файлу хранилища ключей")
            .Validate(o => o.AppId is { Length: > 0 })
            .Validate(o => o.KeyId is { Length: > 0 })
            .Validate(o => o.AppKey is { Length: > 0 })

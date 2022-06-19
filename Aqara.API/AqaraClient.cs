@@ -603,7 +603,7 @@ public class AqaraClient
                 timer.ElapsedMilliseconds,
                 string.Join(';', Features.Select(f => $"{f.DeviceId},{string.Join(',', f.FeatureId)}")),
                 result.Result.Length);
-
+        
         return result
            .Result
            .Select(value => new DeviceFeatureValue

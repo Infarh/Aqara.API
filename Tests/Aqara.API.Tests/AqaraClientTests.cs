@@ -119,7 +119,6 @@ public class AqaraClientTests
 
         var client = new AqaraClient(http, token_store_mock.Object, _Logger, new AqaraClientConfig
         {
-            TokenStorageFile = "access_token.json",
             AppId = app_id,
             KeyId = key_id,
             AppKey = app_key,
