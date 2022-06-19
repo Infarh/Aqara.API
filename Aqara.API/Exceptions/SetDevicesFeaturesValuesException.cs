@@ -11,6 +11,8 @@ public class SetDevicesFeaturesValuesException : AqaraAPIRequestException
 
     public SetDevicesFeaturesValuesResponse? ResponseData { get; init; }
 
+    public SetDevicesFeaturesValuesResponse.SetDevicesFeaturesValuesResponseResult[]? ErrorValues { get; init; }
+
     public SetDevicesFeaturesValuesException() { }
     public SetDevicesFeaturesValuesException(string message) : base(message) { }
     public SetDevicesFeaturesValuesException(string message, Exception inner) : base(message, inner) { }

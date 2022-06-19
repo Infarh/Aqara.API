@@ -1,6 +1,4 @@
-﻿using Aqara.API.TestConsole.Infrastructure;
-
-namespace Aqara.API.TestConsole;
+﻿namespace Aqara.API.TestConsole;
 
 internal static class TestRefForeach
 {

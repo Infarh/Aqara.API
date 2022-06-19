@@ -2,14 +2,22 @@
 
 using Aqara.API.DTO;
 using Aqara.API.Exceptions.Base;
-using Aqara.API.TestConsole;
-using Aqara.API.TestConsole.Infrastructure;
 using Aqara.API.TestConsole.Infrastructure.Extensions;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+
+//int[] values = { 1, 2, 3 };
+
+//var rr = values switch
+//{
+//    null => "null",
+//    [3, 2, 1] => "321",
+//    //[var a, var b] => $"{a},{b}",
+//    //[var a, var b, var c] => $"{a},{b},{c}",
+//    _ => "default"
+//};
 
 var host = Host.CreateDefaultBuilder(args)
    .ConfigureAppConfiguration(cfg => cfg
@@ -36,16 +44,16 @@ var host = Host.CreateDefaultBuilder(args)
    .Build();
 
 var services = host.Services;
-var config = host.Services.GetRequiredService<IConfiguration>();
+var config = services.GetRequiredService<IConfiguration>();
 await host.StartAsync();
 
-var client = host.Services.GetRequiredService<AqaraClient>();
+var client = services.GetRequiredService<AqaraClient>();
 
 try
 {
     //var code = await client.GetAuthorizationKey(config["Aqara:Account"], "24h");
 
-    //var token_info = await client.GetAccessToken(config["Aqara:VerificationCode"], config["Aqara:Account"]);
+    //var token_info = await client.GetAccessToken("123456", config["Aqara:Account"]);
 
     //var token = await client.RefreshAccessToken();
 
@@ -74,6 +82,11 @@ try
     await client.SetDevicesFeaturesValues(new[] { (switch_id, new[] { (switch_feature_id, 1d) }) });
 }
 catch (AqaraAPIException error)
+{
+    Console.WriteLine(error);
+    throw;
+}
+catch (Exception error)
 {
     Console.WriteLine(error);
     throw;

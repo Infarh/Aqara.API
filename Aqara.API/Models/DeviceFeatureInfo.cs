@@ -1,4 +1,8 @@
-﻿namespace Aqara.API.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+using EnumFastToStringGenerated;
+
+namespace Aqara.API.Models;
 
 public class DeviceFeatureInfo
 {
@@ -22,7 +26,7 @@ public class DeviceFeatureInfo
 
     public string SubjectModel { get; init; } = null!;
 
-    /// <summary>Permissions (0-readable, 1-writable, 2-readable/writable)</summary>
+    /// <summary>Режим доступа к значению</summary>
     public DeviceFeatureAccess Access { get; init; }
 
     public string Server { get; init; } = null!;
@@ -32,9 +36,19 @@ public class DeviceFeatureInfo
     public override string ToString() => $"{ResourceId}:{Name}[{MinValue}:{MaxValue}]:{Access}";
 }
 
+/// <summary>Режим доступа к значению</summary>
+[EnumGenerator]
 public enum DeviceFeatureAccess
 {
+    /// <summary>Чтение</summary>
+    [Display(Name = "Чтение")]
     Read,
+
+    /// <summary>Запись</summary>
+    [Display(Name = "Запись")]
     Write,
+
+    /// <summary>Чтение и запись</summary>
+    [Display(Name = "Чтение и запись")]
     ReadWrite,
 }

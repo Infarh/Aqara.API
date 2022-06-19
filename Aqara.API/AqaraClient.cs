@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http.Json;
-using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,7 +11,6 @@ using Aqara.API.DTO;
 using Aqara.API.Exceptions;
 using Aqara.API.Infrastructure;
 using Aqara.API.Models;
-
 using Microsoft.Extensions.Logging;
 
 namespace Aqara.API;
@@ -62,7 +60,7 @@ public class AqaraClient
     /// <summary>Получить клиента с конфигурацией заголовков запроса с добавленным токеном авторизации</summary>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Сконфигурированный клиент</returns>
-    /// <exception cref="InvalidOperationException">Возникает в случае если не удалось получить токен авторизации от сервера</exception>
+    /// <exception cref="InvalidOperationException">В случае если не удалось получить данные от сервиса</exception>
     private async Task<HttpClient> GetClientWithAccessToken(CancellationToken Cancel)
     {
         if (await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false) is not { } token)
@@ -135,7 +133,7 @@ public class AqaraClient
     /// <param name="AccountType">Тип аккаунта из запроса <see cref="GetAuthorizationKey"/></param>
     /// <param name="Cancel"></param>
     /// <returns>Токен авторизации</returns>
-    /// <exception cref="RequestAccessTokenException">В случае если не удалось получить токен авторизации</exception>
+    /// <exception cref="RequestAccessTokenException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<AccessTokenInfo> GetAccessToken(
         string VerificationCode,
         string? Account = null,
@@ -150,15 +148,6 @@ public class AqaraClient
            .GetJsonResult<AccessTokenResponse>(Cancel)
            .ConfigureAwait(false);
         timer.Stop();
-
-        //var response = await GetClient()
-        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
-        //   .ConfigureAwait(false);
-
-        //var result = await response
-        //   .EnsureSuccessStatusCode()
-        //   .Content
-        //   .ReadFromJsonAsync<AccessTokenResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new RequestAccessTokenException("Не удалось получить ответ от сервера")
@@ -193,16 +182,25 @@ public class AqaraClient
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Новый токен авторизации</returns>
     /// <exception cref="InvalidOperationException">Возникает при отсутствии токена обновления токена авторизации</exception>
-    /// <exception cref="RefreshAccessTokenException">Возникает в случае если не удалось получить токен авторизации</exception>
+    /// <exception cref="RefreshAccessTokenException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<AccessTokenInfo> RefreshAccessToken(CancellationToken Cancel = default)
     {
-        if (await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false) is not { } token)
-        {
-            _Logger.LogError("Не удалось получить токен обновления токена доступа");
-            throw new InvalidOperationException("Невозможно обновить токен авторизации потом, что отсутствует информация о старом токене авторизации");
-        }
+        if (await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false) is { RefreshToken: var refresh_token })
+            return await RefreshAccessToken(refresh_token, Cancel);
 
-        var data = new RefreshAccessTokenRequest(token.RefreshToken);
+        _Logger.LogError("Не удалось получить токен обновления токена доступа");
+        throw new InvalidOperationException("Невозможно обновить токен авторизации потом, что отсутствует информация о старом токене авторизации");
+    }
+
+    /// <summary>Обновить токен авторизации</summary>
+    /// <param name="RefreshToken">Токен обновления токена авторизации</param>
+    /// <param name="Cancel">Флаг отмены асинхронной операции</param>
+    /// <returns>Новый токен авторизации</returns>
+    /// <exception cref="InvalidOperationException">Возникает при отсутствии токена обновления токена авторизации</exception>
+    /// <exception cref="RefreshAccessTokenException">В случае если не удалось получить данные от сервиса</exception>
+    public async Task<AccessTokenInfo> RefreshAccessToken(string RefreshToken, CancellationToken Cancel = default)
+    {
+        var data = new RefreshAccessTokenRequest(RefreshToken);
 
         var timer = Stopwatch.StartNew();
         var result = await GetClient()
@@ -210,15 +208,6 @@ public class AqaraClient
            .GetJsonResult<RefreshAccessTokenResponse>(Cancel)
            .ConfigureAwait(false);
         timer.Stop();
-
-        //var response = await GetClient()
-        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
-        //   .ConfigureAwait(false);
-
-        //var result = await response
-        //   .EnsureSuccessStatusCode()
-        //   .Content
-        //   .ReadFromJsonAsync<RefreshAccessTokenResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new RefreshAccessTokenException("Не удалось получить ответ от сервера")
@@ -253,7 +242,7 @@ public class AqaraClient
     /// <param name="PageSize">Размер страницы должен быть больше 0</param>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Массив местоположений</returns>
-    /// <exception cref="GetPositionsException">Возникает в случае если не удалось получить данные о местоположениях от сервера</exception>
+    /// <exception cref="GetPositionsException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<PositionInfo[]> GetPositions(string? ParentPositionId = null, int? Page = 1, int? PageSize = 30, CancellationToken Cancel = default)
     {
         var data = new GetPositionsRequest(ParentPositionId, Page, PageSize);
@@ -266,15 +255,6 @@ public class AqaraClient
            .GetJsonResult<GetPositionsResponse>(Cancel)
            .ConfigureAwait(false);
         timer.Stop();
-
-        //var response = await client
-        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
-        //   .ConfigureAwait(false);
-
-        //var result = await response
-        //   .EnsureSuccessStatusCode()
-        //   .Content
-        //   .ReadFromJsonAsync<GetPositionsResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new GetPositionsException("Не удалось получить ответ от сервера")
@@ -317,7 +297,7 @@ public class AqaraClient
     /// <param name="PageSize">Количество страниц (должно быть больше 0)</param>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Массив устройств указанного местоположения</returns>
-    /// <exception cref="GetDevicesByPositionException">Возникает в случае если не удалось получить список местоположений</exception>
+    /// <exception cref="GetDevicesByPositionException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<DeviceInfo[]> GetDevicesByPosition(string? PositionId = null, int? Page = 1, int PageSize = 30, CancellationToken Cancel = default)
     {
         var data = new GetDevicesByPositionRequest(PositionId, Page, PageSize);
@@ -330,15 +310,6 @@ public class AqaraClient
            .GetJsonResult<GetDevicesByPositionResponse>(Cancel)
            .ConfigureAwait(false);
         timer.Stop();
-
-        //var response = await client
-        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
-        //   .ConfigureAwait(false);
-
-        //var result = await response
-        //   .EnsureSuccessStatusCode()
-        //   .Content
-        //   .ReadFromJsonAsync<GetDevicesByPositionResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new GetDevicesByPositionException("Не удалось получить ответ от сервера")
@@ -401,14 +372,12 @@ public class AqaraClient
            .ToArray();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="Model"></param>
-    /// <param name="ResourceId"></param>
+    /// <summary>Получить перечень возможностей устройства</summary>
+    /// <param name="Model">Идентификатор модели устройства</param>
+    /// <param name="ResourceId">Идентификатор ресурса (если не указан, будет возвращена информация о всех возможностях)</param>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
-    /// <returns></returns>
-    /// <exception cref="GetDeviceModelFeaturesException"></exception>
+    /// <returns>Массив с информацией о возможностях устройства</returns>
+    /// <exception cref="GetDeviceModelFeaturesException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<DeviceFeatureInfo[]> GetDeviceModelFeatures(string Model, string? ResourceId = null, CancellationToken Cancel = default)
     {
         var data = new GetDeviceModelFeaturesRequest(Model, ResourceId);
@@ -421,15 +390,6 @@ public class AqaraClient
            .GetJsonResult<GetDeviceModelFeaturesResponse>(Cancel)
            .ConfigureAwait(false);
         timer.Stop();
-
-        //var response = await client
-        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
-        //   .ConfigureAwait(false);
-
-        //var result = await response
-        //   .EnsureSuccessStatusCode()
-        //   .Content
-        //   .ReadFromJsonAsync<GetDeviceModelFeaturesResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new GetDeviceModelFeaturesException("Не удалось получить ответ от сервера")
@@ -479,20 +439,18 @@ public class AqaraClient
            .ToArray();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="DeviceId"></param>
-    /// <param name="FeatureId"></param>
-    /// <param name="AggregationType"></param>
-    /// <param name="StartTime"></param>
-    /// <param name="Dimension"></param>
-    /// <param name="EndTime"></param>
-    /// <param name="Size"></param>
+    /// <summary>Получить статистические данные о параметрах устройства</summary>
+    /// <param name="DeviceId">Идентификатор устройства</param>
+    /// <param name="FeatureId">Перечисление идентификаторов интересующих параметров</param>
+    /// <param name="AggregationType">Виды статистических данных</param>
+    /// <param name="StartTime">Время начала сбора данных</param>
+    /// <param name="Dimension">Разрешающая способность выборки</param>
+    /// <param name="EndTime">Время окончания выборки</param>
+    /// <param name="Size">Размер выборки</param>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
-    /// <returns></returns>
-    /// <exception cref="InvalidEnumArgumentException"></exception>
-    /// <exception cref="GetDeviceFeatureStatisticException"></exception>
+    /// <returns>Массив со значениями выборки</returns>
+    /// <exception cref="InvalidEnumArgumentException">При некорректном значении параметра <paramref name="Dimension"/></exception>
+    /// <exception cref="GetDeviceFeatureStatisticException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<StatisticValueInfo[]> GetDeviceFeatureStatistic(
         string DeviceId,
         IEnumerable<string> FeatureId,
@@ -557,15 +515,6 @@ public class AqaraClient
            .ConfigureAwait(false);
         timer.Stop();
 
-        //var response = await client
-        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
-        //   .ConfigureAwait(false);
-
-        //var result = await response
-        //   .EnsureSuccessStatusCode()
-        //   .Content
-        //   .ReadFromJsonAsync<GetDeviceFeatureStatisticResponse>(cancellationToken: Cancel);
-
         if (result is null)
             throw new GetDeviceFeatureStatisticException("Не удалось получить ответ от сервера")
             {
@@ -618,13 +567,11 @@ public class AqaraClient
            .ToArray();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="Features"></param>
+    /// <summary>Получить значения параметров указанных устройств</summary>
+    /// <param name="Features">Параметры запроса устройств и их параметров</param>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
-    /// <returns></returns>
-    /// <exception cref="GetDevicesFeaturesValuesException"></exception>
+    /// <returns>Значения параметров устройств</returns>
+    /// <exception cref="GetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<DeviceFeatureValue[]> GetDevicesFeaturesValues((string DeviceId, string[] FeatureId)[] Features, CancellationToken Cancel = default)
     {
         var data = new GetDevicesFeaturesValuesRequest(Features);
@@ -637,15 +584,6 @@ public class AqaraClient
            .GetJsonResult<GetDevicesFeaturesValuesResponse>(Cancel)
            .ConfigureAwait(false);
         timer.Stop();
-
-        //var response = await client
-        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
-        //   .ConfigureAwait(false);
-
-        //var result = await response
-        //   .EnsureSuccessStatusCode()
-        //   .Content
-        //   .ReadFromJsonAsync<GetDevicesFeaturesValuesResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new GetDevicesFeaturesValuesException("Не удалось получить ответ от сервера")
@@ -678,43 +616,38 @@ public class AqaraClient
            .ToArray();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="DeviceId"></param>
-    /// <param name="FeaturesIds"></param>
-    /// <returns></returns>
+    /// <summary>Получить значения параметров устройства</summary>
+    /// <param name="DeviceId">Идентификатор устройства</param>
+    /// <param name="FeaturesIds">Идентификаторы требуемых параметров</param>
+    /// <returns>Массив значений запрошенных параметров</returns>
+    /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<DeviceFeatureValue[]> GetDeviceFeaturesValues(string DeviceId, params string[] FeaturesIds) => await GetDevicesFeaturesValues(new[] { (DeviceId, FeaturesIds) }).ConfigureAwait(false);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="Cancel"></param>
-    /// <param name="DeviceId"></param>
-    /// <param name="FeaturesIds"></param>
-    /// <returns></returns>
+    /// <summary>Получить значения параметров устройства</summary>
+    /// <param name="Cancel">Флаг отмены асинхронной операции</param>
+    /// <param name="DeviceId">Идентификатор устройства</param>
+    /// <param name="FeaturesIds">Идентификаторы требуемых параметров</param>
+    /// <returns>Массив значений параметров устройства</returns>
+    /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<DeviceFeatureValue[]> GetDeviceFeaturesValues(CancellationToken Cancel, string DeviceId, params string[] FeaturesIds) => await GetDevicesFeaturesValues(new[] { (DeviceId, FeaturesIds) }, Cancel).ConfigureAwait(false);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="DeviceId"></param>
-    /// <param name="FeatureId"></param>
-    /// <param name="Cancel"></param>
-    /// <returns></returns>
+    /// <summary>Получить значение параметра устройства</summary>
+    /// <param name="DeviceId">Идентификатор устройства</param>
+    /// <param name="FeatureId">Идентификатор параметра</param>
+    /// <param name="Cancel">Флаг отмены асинхронной операции</param>
+    /// <returns>Значение параметра</returns>
+    /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
     public async Task<DeviceFeatureValue> GetDeviceFeatureValue(string DeviceId, string FeatureId, CancellationToken Cancel = default)
     {
         var values = await GetDeviceFeaturesValues(Cancel, DeviceId, FeatureId).ConfigureAwait(false);
         return values[0];
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="Values"></param>
-    /// <param name="Cancel"></param>
-    /// <returns></returns>
-    /// <exception cref="SetDevicesFeaturesValuesException"></exception>
+    /// <summary>Установка значения параметров устройств</summary>
+    /// <param name="Values">Идентификаторы устанавливаемых параметров устройств</param>
+    /// <param name="Cancel">Флаг отмены асинхронной операции</param>
+    /// <returns>Задача установки значения параметров</returns>
+    /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
     public async Task SetDevicesFeaturesValues((string DeviceId, (string FeatureId, double Value)[] Values)[] Values, CancellationToken Cancel = default)
     {
         var data = new SetDevicesFeaturesValuesRequest(Values);
@@ -727,15 +660,6 @@ public class AqaraClient
            .GetJsonResult<SetDevicesFeaturesValuesResponse>(Cancel)
            .ConfigureAwait(false);
         timer.Stop();
-
-        //var response = await client
-        //   .PostAsJsonAsync("", data, __SerializerOptions, Cancel)
-        //   .ConfigureAwait(false);
-
-        //var result = await response
-        //   .EnsureSuccessStatusCode()
-        //   .Content
-        //   .ReadFromJsonAsync<GetDevicesFeaturesValuesResponse>(cancellationToken: Cancel);
 
         if (result is null)
             throw new SetDevicesFeaturesValuesException("Не удалось получить ответ от сервера")
@@ -750,57 +674,12 @@ public class AqaraClient
                 ResponseData = result,
             };
 
+        if (result.Results.Any(r => r.ErrorCode != 0))
+            throw new SetDevicesFeaturesValuesException($"Ошибка установки значения свойств {string.Join(',', result.Results.Select(r => $"{r.DeviceId}:{r.Error}"))}")
+            {
+                RequestData = data,
+                ResponseData = result,
+                ErrorValues = result.Results.Where(r => r.Error != 0).ToArray(),
+            };
     }
-}
-/// <summary>
-/// 
-/// </summary>
-public enum FeatureStatisticAggregationDimension
-{
-    /// <summary></summary>
-    Interval30m,
-    /// <summary></summary>
-    Interval05h = Interval30m,
-    /// <summary></summary>
-    Interval1h,
-    /// <summary></summary>
-    Interval2h,
-    /// <summary></summary>
-    Interval3h,
-    /// <summary></summary>
-    Interval4h,
-    /// <summary></summary>
-    Interval5h,
-    /// <summary></summary>
-    Interval6h,
-    /// <summary></summary>
-    Interval12h,
-    /// <summary></summary>
-    Interval1d,
-    /// <summary></summary>
-    Interval24h = Interval1d,
-    /// <summary></summary>
-    Interval7d,
-    /// <summary></summary>
-    Interval30d
-}
-
-/// <summary></summary>
-[Flags]
-public enum FeatureStatisticAggregationType : short
-{
-    /// <summary></summary>
-    Difference = 0b0_0001,
-    /// <summary></summary>
-    Min = 0b0_0010,
-    /// <summary></summary>
-    Max = 0b0_0100,
-    /// <summary></summary>
-    Average = 0b0_1000,
-    /// <summary></summary>
-    Frequency = 0b1_0000,
-    /// <summary></summary>
-    All = 0b1_1111,
-    /// <summary></summary>
-    All2 = 0
 }

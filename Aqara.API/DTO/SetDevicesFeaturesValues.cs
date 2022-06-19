@@ -7,7 +7,7 @@ public class SetDevicesFeaturesValuesRequest
 {
     public SetDevicesFeaturesValuesRequest() { }
 
-    public SetDevicesFeaturesValuesRequest((string DeviceId, (string FeatureId, double Value)[] Values)[] Values) => 
+    public SetDevicesFeaturesValuesRequest((string DeviceId, (string FeatureId, double Value)[] Values)[] Values) =>
         Data = Values.Select(device => new SetDevicesFeaturesValuesRequestData(device.DeviceId, device.Values)).ToArray();
 
     [JsonPropertyName("intent")]
