@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 
+using Aqara.API;
 using Aqara.API.DTO;
 using Aqara.API.Exceptions.Base;
 using Aqara.API.TestConsole.Infrastructure.Extensions;
@@ -26,20 +27,22 @@ var host = Host.CreateDefaultBuilder(args)
        .AddCommandLine(args))
    .ConfigureServices((env, Services) =>
     {
-        Services.AddOptions<AqaraClientConfig>()
-           .Bind(env.Configuration.GetSection("Aqara"))
-           .Validate(o => o.AppId is { Length: > 0 })
-           .Validate(o => o.KeyId is { Length: > 0 })
-           .Validate(o => o.AppKey is { Length: > 0 })
-           .ValidateDataAnnotations()
-           .ValidateOnStart()
-           .Services
-           .AddTransient(s => s.GetRequiredService<IOptionsSnapshot<AqaraClientConfig>>().Value);
+        //Services.AddOptions<AqaraClientConfig>()
+        //   .Bind(env.Configuration.GetSection("Aqara"))
+        //   .Validate(o => o.AppId is { Length: > 0 })
+        //   .Validate(o => o.KeyId is { Length: > 0 })
+        //   .Validate(o => o.AppKey is { Length: > 0 })
+        //   .ValidateDataAnnotations()
+        //   .ValidateOnStart()
+        //   .Services
+        //   .AddTransient(s => s.GetRequiredService<IOptionsSnapshot<AqaraClientConfig>>().Value);
 
-        Services.AddSingleton<IAccessTokenSource>(_ => new AccessTokenFileSource("AccessToken.json"));
-        Services.AddHttpClient<AqaraClient>("Aqara", (s, client) => client.BaseAddress = new(s.GetConfigValue("Aqara:Address")));
+        //Services.AddSingleton<IAccessTokenSource>(_ => new AccessTokenFileSource("AccessToken.json"));
+        //Services.AddHttpClient<AqaraClient>("Aqara", (s, client) => client.BaseAddress = new(s.GetConfigValue("Aqara:Address")));
 
-        Services.Configure<JsonSerializerOptions>(opt => opt.AddContext<DTOSerializerContext>());
+        //Services.Configure<JsonSerializerOptions>(opt => opt.AddContext<DTOSerializerContext>());
+
+        Services.AddAqaraServices(env.Configuration.GetSection("Aqara"));
     })
    .Build();
 
@@ -47,7 +50,10 @@ var services = host.Services;
 var config = services.GetRequiredService<IConfiguration>();
 await host.StartAsync();
 
-var client = services.GetRequiredService<AqaraClient>();
+var token_store = services.GetRequiredService<IAccessTokenSource>();
+var token = await token_store.GetAccessToken();
+var client = services.GetRequiredService<IAqaraClient>();
+var device_manager = services.GetRequiredService<IDeviceManager>();
 
 try
 {
@@ -76,10 +82,19 @@ try
     //var value = await client.GetDeviceFeatureValue(termometr_id, resource_temperature);
 
     const string switch_id = "lumi.54ef4410001c67a8";
-    //const string switch_model_id = "lumi.switch.l1aeu1";
+    const string switch_model_id = "lumi.switch.l1aeu1";
     const string switch_feature_id = "4.1.85";
 
-    await client.SetDevicesFeaturesValues(new[] { (switch_id, new[] { (switch_feature_id, 1d) }) });
+    var features = await client.GetDeviceModelFeatures(switch_model_id);
+    //await client.SetDevicesFeaturesValues(new[] { (switch_id, new[] { (switch_feature_id, 1d) }) });
+
+    //await device_manager.Authorize("user@server.ru", "123456");
+
+    //var devices = await device_manager.GetDevices();
+
+    //var switch_device = await device_manager.GetDeviceById(switch_id);
+    var switch_device = await device_manager.GetDeviceByName("Свет в коридоре");
+    var switch_features = await switch_device.GetFeatures();
 }
 catch (AqaraAPIException error)
 {

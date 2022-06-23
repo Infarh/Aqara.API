@@ -3,8 +3,16 @@ using System.Text.Json.Serialization;
 
 namespace Aqara.API;
 
-public record AccessTokenInfo(string AccessToken, string RefreshToken, int Expires, string OpenId, DateTime CreationTime)
+/// <summary>Информация о токене авторизации</summary>
+/// <param name="AccessToken">Токен авторизации</param>
+/// <param name="RefreshToken">Токен обновления токена авторизации (действителен 30 дней)</param>
+/// <param name="Expires">Интервал времени в секундах валидности токена авторизации</param>
+/// <param name="OpenId"></param>
+public record AccessTokenInfo(string AccessToken, string RefreshToken, int Expires, string OpenId)
 {
+    /// <summary>Время создания токена</summary>
+    public DateTime CreationTime { get; init; } = DateTime.Now;
+
     [JsonIgnore]
     public DateTime ExpiresTime => CreationTime.AddSeconds(Expires);
 

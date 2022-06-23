@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 namespace Aqara.API;
 
 /// <summary>Клиент Aqara API сервера</summary>
-public class AqaraClient
+public class AqaraClient : IAqaraClient
 {
     /// <summary>Параметры сериализации с подавлением отсутствующих значений</summary>
     private static readonly JsonSerializerOptions __SerializerOptions = new JsonSerializerOptions()
@@ -167,7 +167,7 @@ public class AqaraClient
         var expire = int.Parse(result.Result.ExpiresIn);
         var open_id = result.Result.OpenId;
 
-        var token = new AccessTokenInfo(access_token, refresh_token, expire, open_id, DateTime.Now);
+        var token = new AccessTokenInfo(access_token, refresh_token, expire, open_id);
 
         if (_Logger.IsEnabled(LogLevel.Information))
             _Logger.LogInformation("Токен доступа получен за {0}мс. Время жизни {1}c (до {2})",
@@ -227,7 +227,7 @@ public class AqaraClient
         var expire = int.Parse(result.Result.ExpiresIn);
         var open_id = result.Result.OpenId;
 
-        var result_token = new AccessTokenInfo(access_token, refresh_token, expire, open_id, DateTime.Now);
+        var result_token = new AccessTokenInfo(access_token, refresh_token, expire, open_id);
 
         if (_Logger.IsEnabled(LogLevel.Information))
             _Logger.LogInformation("Токен доступа обновлён за {0}мс. Полученный токен истекает через {1}с ({2})",
@@ -243,7 +243,7 @@ public class AqaraClient
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Массив местоположений</returns>
     /// <exception cref="GetPositionsException">В случае если не удалось получить данные от сервиса</exception>
-    public async Task<PositionInfo[]> GetPositions(string? ParentPositionId = null, int? Page = 1, int? PageSize = 30, CancellationToken Cancel = default)
+    public async Task<(PositionInfo[] Positions, int TotalCount)> GetPositions(string? ParentPositionId = null, int? Page = 1, int? PageSize = 30, CancellationToken Cancel = default)
     {
         var data = new GetPositionsRequest(ParentPositionId, Page, PageSize);
 
@@ -277,18 +277,19 @@ public class AqaraClient
                 _Logger.LogInformation("Запрос местоположений для родительского положения {0} выполнен успешно за {1}мс. Получено мест {2}. Всего мест {3}",
                     ParentPositionId, timer.ElapsedMilliseconds, result.Result.Data.Count, result.Result.TotalCount);
 
-        return result
+        var positions = result
            .Result
            .Data
            .Select(position => new PositionInfo
-           {
-               PositionId = position.PositionId,
-               ParentPositionId = position.ParentPositionId,
-               Name = position.Name,
-               Description = position.Description,
-               CreateTime = DateTime.UnixEpoch.AddTicks(position.CreateTime * 10000)
-           })
+            {
+                PositionId = position.PositionId,
+                ParentPositionId = position.ParentPositionId,
+                Name = position.Name,
+                Description = position.Description,
+                CreateTime = DateTime.UnixEpoch.AddTicks(position.CreateTime * 10000)
+            })
            .ToArray();
+        return (positions, result.Result.TotalCount);
     }
 
     /// <summary>Получить перечень устройств по заданному местоположению (если положеие не указано, то возвращается полный список устройств</summary>
@@ -298,7 +299,7 @@ public class AqaraClient
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Массив устройств указанного местоположения</returns>
     /// <exception cref="GetDevicesByPositionException">В случае если не удалось получить данные от сервиса</exception>
-    public async Task<DeviceInfo[]> GetDevicesByPosition(string? PositionId = null, int? Page = 1, int PageSize = 30, CancellationToken Cancel = default)
+    public async Task<(DeviceInfo[] Devices, int TotalCount)> GetDevicesByPosition(string? PositionId = null, int? Page = 1, int PageSize = 30, CancellationToken Cancel = default)
     {
         var data = new GetDevicesByPositionRequest(PositionId, Page, PageSize);
 
@@ -333,43 +334,45 @@ public class AqaraClient
                 _Logger.LogInformation("Запрос устройств для положения {0} выполнен успешно за {1}мс. Получено устройств {2}. Всего устройств {3}",
                     PositionId, timer.ElapsedMilliseconds, result.Result.Data.Length, result.Result.TotalCount);
 
-        return result
+
+        var devices = result
            .Result
            .Data
            .Select(device => new DeviceInfo
-           {
-               Id = device.Id,
-               ParentId = device.ParentId,
-               PositionId = device.PositionId,
-               DeviceName = device.DeviceName,
-               CreateTime = DateTime.UnixEpoch.AddTicks(device.CreateTime * 10000),
-               UpdateTime = DateTime.UnixEpoch.AddTicks(device.UpdateTime * 10000),
-               TimeZone = device.TimeZone,
-               Model = device.Model,
-               ModelType = device.ModelType switch
-               {
-                   1 => DeviceModelType.GatewayWithChilds,
-                   2 => DeviceModelType.GatewayWithoutChilds,
-                   3 => DeviceModelType.SubDevice,
-                   _ => throw new GetDevicesByPositionException($"Некорректное значение типа модели устройства {device.ModelType}")
-                   {
-                       RequestData = data,
-                       ResponseData = result,
-                   }
-               },
-               OnlineState = device.State switch
-               {
-                   0 => false,
-                   1 => true,
-                   _ => throw new GetDevicesByPositionException($"Некорректное значение состояния устройства {device.State}")
-                   {
-                       RequestData = data,
-                       ResponseData = result,
-                   }
-               },
-               FirmwareVersion = device.FirmwareVersion,
-           })
+            {
+                Id = device.Id,
+                ParentId = device.ParentId,
+                PositionId = device.PositionId,
+                Name = device.DeviceName,
+                CreateTime = DateTime.UnixEpoch.AddTicks(device.CreateTime * 10000),
+                UpdateTime = DateTime.UnixEpoch.AddTicks(device.UpdateTime * 10000),
+                TimeZone = device.TimeZone,
+                ModelId = device.Model,
+                ModelType = device.ModelType switch
+                {
+                    1 => DeviceModelType.GatewayWithChilds,
+                    2 => DeviceModelType.GatewayWithoutChilds,
+                    3 => DeviceModelType.SubDevice,
+                    _ => throw new GetDevicesByPositionException($"Некорректное значение типа модели устройства {device.ModelType}")
+                    {
+                        RequestData = data,
+                        ResponseData = result,
+                    }
+                },
+                OnlineState = device.State switch
+                {
+                    0 => false,
+                    1 => true,
+                    _ => throw new GetDevicesByPositionException($"Некорректное значение состояния устройства {device.State}")
+                    {
+                        RequestData = data,
+                        ResponseData = result,
+                    }
+                },
+                FirmwareVersion = device.FirmwareVersion,
+            })
            .ToArray();
+        return (devices, result.Result.TotalCount);
     }
 
     /// <summary>Получить перечень возможностей устройства</summary>
@@ -416,7 +419,7 @@ public class AqaraClient
            .Result
            .Select(info => new DeviceFeatureInfo
            {
-               ResourceId = info.ResourceId,
+               FeatureId = info.ResourceId,
                Name = info.Name,
                NameEn = info.NameEn,
                Description = info.Description,
@@ -615,34 +618,7 @@ public class AqaraClient
            })
            .ToArray();
     }
-
-    /// <summary>Получить значения параметров устройства</summary>
-    /// <param name="DeviceId">Идентификатор устройства</param>
-    /// <param name="FeaturesIds">Идентификаторы требуемых параметров</param>
-    /// <returns>Массив значений запрошенных параметров</returns>
-    /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
-    public async Task<DeviceFeatureValue[]> GetDeviceFeaturesValues(string DeviceId, params string[] FeaturesIds) => await GetDevicesFeaturesValues(new[] { (DeviceId, FeaturesIds) }).ConfigureAwait(false);
-
-    /// <summary>Получить значения параметров устройства</summary>
-    /// <param name="Cancel">Флаг отмены асинхронной операции</param>
-    /// <param name="DeviceId">Идентификатор устройства</param>
-    /// <param name="FeaturesIds">Идентификаторы требуемых параметров</param>
-    /// <returns>Массив значений параметров устройства</returns>
-    /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
-    public async Task<DeviceFeatureValue[]> GetDeviceFeaturesValues(CancellationToken Cancel, string DeviceId, params string[] FeaturesIds) => await GetDevicesFeaturesValues(new[] { (DeviceId, FeaturesIds) }, Cancel).ConfigureAwait(false);
-
-    /// <summary>Получить значение параметра устройства</summary>
-    /// <param name="DeviceId">Идентификатор устройства</param>
-    /// <param name="FeatureId">Идентификатор параметра</param>
-    /// <param name="Cancel">Флаг отмены асинхронной операции</param>
-    /// <returns>Значение параметра</returns>
-    /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
-    public async Task<DeviceFeatureValue> GetDeviceFeatureValue(string DeviceId, string FeatureId, CancellationToken Cancel = default)
-    {
-        var values = await GetDeviceFeaturesValues(Cancel, DeviceId, FeatureId).ConfigureAwait(false);
-        return values[0];
-    }
-
+    
     /// <summary>Установка значения параметров устройств</summary>
     /// <param name="Values">Идентификаторы устанавливаемых параметров устройств</param>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
