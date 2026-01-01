@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace Aqara.API.Exceptions.Base;
+﻿namespace Aqara.API.Exceptions.Base;
 
 [Serializable]
 public class AqaraAPIRequestException : AqaraAPIException
@@ -10,10 +8,4 @@ public class AqaraAPIRequestException : AqaraAPIException
     public AqaraAPIRequestException() { }
     public AqaraAPIRequestException(string message) : base(message) { }
     public AqaraAPIRequestException(string message, Exception inner) : base(message, inner) { }
-
-    protected AqaraAPIRequestException(
-        SerializationInfo info,
-        StreamingContext context) : base(info, context)
-    {
-    }
 }

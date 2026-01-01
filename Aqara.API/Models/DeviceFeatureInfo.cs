@@ -23,10 +23,10 @@ public class DeviceFeatureInfo
     public string DescriptionEn { get; init; } = null!;
 
     /// <summary>Минимальное значение параметра</summary>
-    public long MinValue { get; init; }
+    public long? MinValue { get; init; }
 
     /// <summary>Максимальное значение параметра</summary>
-    public long MaxValue { get; init; }
+    public long? MaxValue { get; init; }
 
     /// <summary>Единица измерения</summary>
     public int? Unit { get; init; }
@@ -43,7 +43,7 @@ public class DeviceFeatureInfo
 
     public string Enums { get; init; } = null!;
 
-    public override string ToString() => $"{FeatureId}:{Name}[{MinValue}:{MaxValue}]:{Access}";
+    public override string ToString() => $"{FeatureId}:{Name}[{MinValue?.ToString() ?? "n/a"}:{MaxValue?.ToString() ?? "n/a"}]:{Access}";
 }
 
 /// <summary>Режим доступа к значению</summary>

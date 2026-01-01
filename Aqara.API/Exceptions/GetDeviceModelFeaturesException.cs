@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using Aqara.API.DTO;
+﻿using Aqara.API.DTO;
 using Aqara.API.Exceptions.Base;
 
 namespace Aqara.API.Exceptions;
@@ -14,10 +13,4 @@ public class GetDeviceModelFeaturesException : AqaraAPIRequestException
     public GetDeviceModelFeaturesException() { }
     public GetDeviceModelFeaturesException(string message) : base(message) { }
     public GetDeviceModelFeaturesException(string message, Exception inner) : base(message, inner) { }
-
-    protected GetDeviceModelFeaturesException(
-        SerializationInfo info,
-        StreamingContext context) : base(info, context)
-    {
-    }
 }

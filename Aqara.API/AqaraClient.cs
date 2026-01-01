@@ -11,51 +11,63 @@ using Aqara.API.DTO;
 using Aqara.API.Exceptions;
 using Aqara.API.Infrastructure;
 using Aqara.API.Models;
+
 using Microsoft.Extensions.Logging;
 
 namespace Aqara.API;
 
 /// <summary>Клиент Aqara API сервера</summary>
-public class AqaraClient : IAqaraClient
+/// <remarks>Инициализация клиента сервера Aqara API</remarks>
+/// <param name="Client">Клиент Http для отправки запросов серверу</param>
+/// <param name="AccessTokenSource">Хранилище токена авторизации</param>
+/// <param name="Logger">Логгер</param>
+/// <param name="Configuration">Конфигурация клиента</param>
+public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource, ILogger<AqaraClient> Logger, AqaraClientConfig Configuration) : IAqaraClient
 {
-    /// <summary>Параметры сериализации с подавлением отсутствующих значений</summary>
-    private static readonly JsonSerializerOptions __SerializerOptions = new JsonSerializerOptions()
+    private static readonly JsonSerializerOptions __SerializerOptions = CreateSerializerOptions();
+
+    private static JsonSerializerOptions CreateSerializerOptions() => new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
-    }
-    .WithContext<DTOSerializerContext>();
+        TypeInfoResolver = DTOSerializerContext.Default,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+    };
 
     /// <summary>Базовый сетевой клиент для отправки запросов</summary>
-    private readonly HttpClient _Client;
+    private readonly HttpClient _Client = Client;
 
     /// <summary>Конфигурация клиента</summary>
-    private readonly AqaraClientConfig _Configuration;
+    private readonly AqaraClientConfig _Configuration = Configuration;
 
     /// <summary>Сервис хранилища токена доступа</summary>
-    private readonly IAccessTokenSource _AccessTokenSource;
+    private readonly IAccessTokenSource _AccessTokenSource = AccessTokenSource;
 
     /// <summary>Логгер</summary>
-    private readonly ILogger<AqaraClient> _Logger;
-
-    /// <summary>Инициализация клиента сервера Aqara API</summary>
-    /// <param name="Client">Клиент Http для отправки запросов серверу</param>
-    /// <param name="AccessTokenSource">Хранилище токена авторизации</param>
-    /// <param name="Logger">Логгер</param>
-    /// <param name="Configuration">Конфигурация клиента</param>
-    public AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource, ILogger<AqaraClient> Logger, AqaraClientConfig Configuration)
-    {
-        _Client = Client;
-        _Configuration = Configuration;
-        _AccessTokenSource = AccessTokenSource;
-        _Logger = Logger;
-    }
+    private readonly ILogger<AqaraClient> _Logger = Logger;
 
     /// <summary>Получить клиента с конфигурацией заголовков запроса</summary>
     /// <param name="AccessToken">Токен авторизации</param>
     /// <returns>Сконфигурированный клиент</returns>
     private HttpClient GetClient(string? AccessToken = null) => _Client.AddHeaders(_Configuration, AccessToken);
+
+    /// <summary>Проверка необходимости авторизации</summary>
+    /// <returns>True, если авторизация необходима; иначе - False</returns>
+    /// <remarks>Авторизация необходима, если токен отсутствует</remarks>
+    public async ValueTask<bool> IsAuthorisationNeeded(CancellationToken Cancel = default)
+    {
+        var token = await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false);
+        return token is null;
+    }
+
+    /// <summary>Проверка валидности токена авторизации</summary>
+    /// <returns>True, если токен валиден; иначе - False</returns>
+    /// <remarks>Токен считается валидным, если он не истек и был получен от сервиса</remarks>
+    public async ValueTask<bool> IsAccessTokenValid(CancellationToken Cancel = default)
+    {
+        var token = await _AccessTokenSource.GetAccessToken(Cancel).ConfigureAwait(false);
+        return token is not null && !token.IsExpire;
+    }
 
     /// <summary>Получить клиента с конфигурацией заголовков запроса с добавленным токеном авторизации</summary>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
@@ -281,13 +293,13 @@ public class AqaraClient : IAqaraClient
            .Result
            .Data
            .Select(position => new PositionInfo
-            {
-                PositionId = position.PositionId,
-                ParentPositionId = position.ParentPositionId,
-                Name = position.Name,
-                Description = position.Description,
-                CreateTime = DateTime.UnixEpoch.AddTicks(position.CreateTime * 10000)
-            })
+           {
+               PositionId = position.PositionId,
+               ParentPositionId = position.ParentPositionId,
+               Name = position.Name,
+               Description = position.Description,
+               CreateTime = DateTime.UnixEpoch.AddTicks(position.CreateTime * 10000)
+           })
            .ToArray();
         return (positions, result.Result.TotalCount);
     }
@@ -339,38 +351,38 @@ public class AqaraClient : IAqaraClient
            .Result
            .Data
            .Select(device => new DeviceInfo
-            {
-                Id = device.Id,
-                ParentId = device.ParentId,
-                PositionId = device.PositionId,
-                Name = device.DeviceName,
-                CreateTime = DateTime.UnixEpoch.AddTicks(device.CreateTime * 10000),
-                UpdateTime = DateTime.UnixEpoch.AddTicks(device.UpdateTime * 10000),
-                TimeZone = device.TimeZone,
-                ModelId = device.Model,
-                ModelType = device.ModelType switch
-                {
-                    1 => DeviceModelType.GatewayWithChilds,
-                    2 => DeviceModelType.GatewayWithoutChilds,
-                    3 => DeviceModelType.SubDevice,
-                    _ => throw new GetDevicesByPositionException($"Некорректное значение типа модели устройства {device.ModelType}")
-                    {
-                        RequestData = data,
-                        ResponseData = result,
-                    }
-                },
-                OnlineState = device.State switch
-                {
-                    0 => false,
-                    1 => true,
-                    _ => throw new GetDevicesByPositionException($"Некорректное значение состояния устройства {device.State}")
-                    {
-                        RequestData = data,
-                        ResponseData = result,
-                    }
-                },
-                FirmwareVersion = device.FirmwareVersion,
-            })
+           {
+               Id = device.Id,
+               ParentId = device.ParentId,
+               PositionId = device.PositionId,
+               Name = device.DeviceName,
+               CreateTime = DateTime.UnixEpoch.AddTicks(device.CreateTime * 10000),
+               UpdateTime = DateTime.UnixEpoch.AddTicks(device.UpdateTime * 10000),
+               TimeZone = device.TimeZone,
+               ModelId = device.Model,
+               ModelType = device.ModelType switch
+               {
+                   1 => DeviceModelType.GatewayWithChilds,
+                   2 => DeviceModelType.GatewayWithoutChilds,
+                   3 => DeviceModelType.SubDevice,
+                   _ => throw new GetDevicesByPositionException($"Некорректное значение типа модели устройства {device.ModelType}")
+                   {
+                       RequestData = data,
+                       ResponseData = result,
+                   }
+               },
+               OnlineState = device.State switch
+               {
+                   0 => false,
+                   1 => true,
+                   _ => throw new GetDevicesByPositionException($"Некорректное значение состояния устройства {device.State}")
+                   {
+                       RequestData = data,
+                       ResponseData = result,
+                   }
+               },
+               FirmwareVersion = device.FirmwareVersion,
+           })
            .ToArray();
         return (devices, result.Result.TotalCount);
     }
@@ -606,7 +618,7 @@ public class AqaraClient : IAqaraClient
                 timer.ElapsedMilliseconds,
                 string.Join(';', Features.Select(f => $"{f.DeviceId},{string.Join(',', f.FeatureId)}")),
                 result.Result.Length);
-        
+
         return result
            .Result
            .Select(value => new DeviceFeatureValue
@@ -618,7 +630,7 @@ public class AqaraClient : IAqaraClient
            })
            .ToArray();
     }
-    
+
     /// <summary>Установка значения параметров устройств</summary>
     /// <param name="Values">Идентификаторы устанавливаемых параметров устройств</param>
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>

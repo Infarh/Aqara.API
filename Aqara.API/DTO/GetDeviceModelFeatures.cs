@@ -39,17 +39,17 @@ public class GetDeviceModelFeaturesResponse : Response
 
     public class GetDeviceModelFeaturesResponseResult
     {
-        [JsonPropertyName("subjectModel")]
-        public string SubjectModel { get; set; } = null!;
+        [JsonPropertyName("model")]
+        public string SubjectModel { get; set; } = null!; // соответствует полю "model" от сервера
 
         [JsonPropertyName("resourceId")]
         public string ResourceId { get; set; } = null!;
 
         [JsonPropertyName("minValue")]
-        public long MinValue { get; set; }
+        public long? MinValue { get; set; } // может быть null в ответе сервера
 
         [JsonPropertyName("maxValue")]
-        public long MaxValue { get; set; }
+        public long? MaxValue { get; set; } // может быть null в ответе сервера
 
         /// <summary>Permissions (0-readable, 1-writable, 2-readable/writable)</summary>
         [JsonPropertyName("access")]

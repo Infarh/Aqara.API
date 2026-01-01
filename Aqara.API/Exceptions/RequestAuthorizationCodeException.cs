@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using Aqara.API.DTO;
+﻿using Aqara.API.DTO;
 using Aqara.API.Exceptions.Base;
 
 namespace Aqara.API.Exceptions;
@@ -14,10 +13,4 @@ public class RequestAuthorizationCodeException : AqaraAPIRequestException
     public RequestAuthorizationCodeException() { }
     public RequestAuthorizationCodeException(string message) : base(message) { }
     public RequestAuthorizationCodeException(string message, Exception inner) : base(message, inner) { }
-
-    protected RequestAuthorizationCodeException(
-        SerializationInfo info,
-        StreamingContext context) : base(info, context)
-    {
-    }
 }

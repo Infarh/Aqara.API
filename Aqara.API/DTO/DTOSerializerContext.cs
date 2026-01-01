@@ -4,6 +4,7 @@ namespace Aqara.API.DTO;
 
 [JsonSourceGenerationOptions(WriteIndented = false)]
 [JsonSerializable(typeof(AuthorizationCodeRequest))]
+[JsonSerializable(typeof(AccessTokenRequest))]
 //[JsonSerializable(typeof(AuthorizationCodeResponse))]
 [JsonSerializable(typeof(GetDeviceFeatureStatisticRequest))]
 //[JsonSerializable(typeof(GetDeviceFeatureStatisticResponse))]

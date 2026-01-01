@@ -108,6 +108,8 @@ public interface IAqaraClient
     /// <returns>Задача установки значения параметров</returns>
     /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
     Task SetDevicesFeaturesValues((string DeviceId, (string FeatureId, double Value)[] Values)[] Values, CancellationToken Cancel = default);
+    ValueTask<bool> IsAuthorisationNeeded(CancellationToken Cancel = default);
+    ValueTask<bool> IsAccessTokenValid(CancellationToken Cancel = default);
 }
 
 public static class AqaraClientExtensions

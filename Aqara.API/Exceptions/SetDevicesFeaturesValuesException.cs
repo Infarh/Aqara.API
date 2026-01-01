@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using Aqara.API.DTO;
+﻿using Aqara.API.DTO;
 using Aqara.API.Exceptions.Base;
 
 namespace Aqara.API.Exceptions;
@@ -16,10 +15,4 @@ public class SetDevicesFeaturesValuesException : AqaraAPIRequestException
     public SetDevicesFeaturesValuesException() { }
     public SetDevicesFeaturesValuesException(string message) : base(message) { }
     public SetDevicesFeaturesValuesException(string message, Exception inner) : base(message, inner) { }
-
-    protected SetDevicesFeaturesValuesException(
-        SerializationInfo info,
-        StreamingContext context) : base(info, context)
-    {
-    }
 }

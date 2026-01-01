@@ -1,24 +1,8 @@
-﻿using System.Text.Json;
+﻿using Aqara.API.Exceptions.Base;
 
-using Aqara.API;
-using Aqara.API.DTO;
-using Aqara.API.Exceptions.Base;
-using Aqara.API.TestConsole.Infrastructure.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-
-//int[] values = { 1, 2, 3 };
-
-//var rr = values switch
-//{
-//    null => "null",
-//    [3, 2, 1] => "321",
-//    //[var a, var b] => $"{a},{b}",
-//    //[var a, var b, var c] => $"{a},{b},{c}",
-//    _ => "default"
-//};
 
 var host = Host.CreateDefaultBuilder(args)
    .UseConsoleLifetime(opt => opt.SuppressStatusMessages = true)
@@ -57,9 +41,32 @@ var device_manager = services.GetRequiredService<IDeviceManager>();
 
 try
 {
-    //var code = await client.GetAuthorizationKey(config["Aqara:Account"], "24h");
+    if (await client.IsAuthorisationNeeded())
+    {
+        Console.WriteLine("Требуется авторизация");
+        var account = config["Aqara:Account"] ?? throw new InvalidOperationException("Не задан аккаунт");
+        var code = await client.GetAuthorizationKey(account, "24h");
+        if (code is not { Length: > 0 })
+        {
+            Console.WriteLine($"Код авторизации был отправлен на электронную почту {account}.");
+            Console.Write("Введите полученный код:");
+            if (Console.ReadLine() is not { Length: > 0 } input_code)
+            {
+                Console.WriteLine("Код авторизации отсутствует. Дальнейшая работа невозможна.");
+                return;
+            }
 
-    //var token_info = await client.GetAccessToken("123456", config["Aqara:Account"]);
+            code = input_code;
+        }
+        else
+            Console.WriteLine($"Код авторизации: {code}");
+
+        if (await client.GetAccessToken(code, config["Aqara:Account"]) is not { } token_info)
+        {
+            Console.WriteLine("Ошибка авторизации. Не получен токен доступа.");
+            return;
+        }
+    }
 
     //var token = await client.RefreshAccessToken();
 

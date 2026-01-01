@@ -1,5 +1,4 @@
 ﻿using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
 
 namespace Aqara.API.TestConsole.Commands;
 
@@ -7,16 +6,21 @@ public class MainCommand : RootCommand
 {
     public MainCommand()
     {
-        Add(new Argument<string>("name", "Test name"));
-        Add(new Option<string?>(new []{ "--about", "-a" }, "Test program"));
-        Add(new Option<string?>(new []{ "--verbose", "-v" }, "vvv"));
+        Add(new Argument<string>("name")
+        {
+            Description = "Test name"
+        });
 
-        Handler = CommandHandler.Create(OnExecute);
-    }
+        Add(new Option<string?>("--about")
+        {
+            Description = "Test program",
+            Aliases = { "-a" }
+        });
 
-    private void OnExecute(string Name, string? Greeting, bool Verbose, IConsole Console)
-    {
-        
-        Console.WriteLine($"{Greeting} Hello wold");
+        Add(new Option<bool>("--verbose")
+        {
+            Description = "vvv",
+            Aliases = { "-v" }
+        });
     }
 }
