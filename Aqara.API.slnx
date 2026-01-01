@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/TestConsole/TestConsole.csproj" />
+  </Folder>
+  <Project Path="Aqara.API/Aqara.API.csproj" />
+</Solution>
