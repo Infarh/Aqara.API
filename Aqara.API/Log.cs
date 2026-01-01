@@ -2,8 +2,10 @@
 
 namespace Aqara.API;
 
+/// <summary>Логгирование</summary>
 internal static partial class Log
 {
+    /// <summary>Не удалось открыть сокет</summary>
     [LoggerMessage(
         EventId = 0,
         Level = LogLevel.Critical,

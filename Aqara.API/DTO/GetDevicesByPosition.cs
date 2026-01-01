@@ -13,7 +13,7 @@ public class GetDevicesByPositionRequest
     public string Intent => Addresses.Device.QueryDeviceInformation;
 
     [JsonPropertyName("dids")]
-    public List<string>? DevicesIds { get; set; } = new();
+    public List<string>? DevicesIds { get; set; } = [];
 
     [JsonPropertyName("data")]
     public GetDevicesRequestData Data { get; set; } = null!;

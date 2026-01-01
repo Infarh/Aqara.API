@@ -22,7 +22,12 @@ namespace Aqara.API;
 /// <param name="AccessTokenSource">Хранилище токена авторизации</param>
 /// <param name="Logger">Логгер</param>
 /// <param name="Configuration">Конфигурация клиента</param>
-public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource, ILogger<AqaraClient> Logger, AqaraClientConfig Configuration) : IAqaraClient
+public class AqaraClient(
+    HttpClient Client,
+    IAccessTokenSource AccessTokenSource,
+    ILogger<AqaraClient> Logger,
+    AqaraClientConfig Configuration)
+    : IAqaraClient
 {
     private static readonly JsonSerializerOptions __SerializerOptions = CreateSerializerOptions();
 
@@ -132,7 +137,7 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
             };
 
         if (_Logger.IsEnabled(LogLevel.Information))
-            _Logger.LogInformation("Запрос кода авторизации выполнен успешно за {0}мс", timer.ElapsedMilliseconds);
+            _Logger.LogInformation("Запрос кода авторизации выполнен успешно за {ElapsedMs}мс", timer.ElapsedMilliseconds);
 
         return result
            .Result!
@@ -182,7 +187,7 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
         var token = new AccessTokenInfo(access_token, refresh_token, expire, open_id);
 
         if (_Logger.IsEnabled(LogLevel.Information))
-            _Logger.LogInformation("Токен доступа получен за {0}мс. Время жизни {1}c (до {2})",
+            _Logger.LogInformation("Токен доступа получен за {ElapsedMs}мс. Время жизни {Expires}c (до {ExpiresTime})",
                 timer.ElapsedMilliseconds, token.Expires, token.ExpiresTime);
 
         await _AccessTokenSource.SetAccessToken(token, Cancel).ConfigureAwait(false);
@@ -242,7 +247,7 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
         var result_token = new AccessTokenInfo(access_token, refresh_token, expire, open_id);
 
         if (_Logger.IsEnabled(LogLevel.Information))
-            _Logger.LogInformation("Токен доступа обновлён за {0}мс. Полученный токен истекает через {1}с ({2})",
+            _Logger.LogInformation("Токен доступа обновлён за {ElapsedMs}мс. Полученный токен истекает через {Expires}с ({ExpiresTime})",
                 timer.ElapsedMilliseconds, result_token.Expires, result_token.ExpiresTime);
 
         return await _AccessTokenSource.SetAccessToken(result_token, Cancel);
@@ -283,10 +288,10 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
 
         if (_Logger.IsEnabled(LogLevel.Information))
             if (ParentPositionId is null)
-                _Logger.LogInformation("Запрос местоположений выполнен успешно за {0}мс. Получено мест {1}. Всего мест {2}",
+                _Logger.LogInformation("Запрос местоположений выполнен успешно за {ElapsedMs}мс. Получено мест {DataLength}. Всего мест {TotalCount}.",
                     timer.ElapsedMilliseconds, result.Result.Data.Count, result.Result.TotalCount);
             else
-                _Logger.LogInformation("Запрос местоположений для родительского положения {0} выполнен успешно за {1}мс. Получено мест {2}. Всего мест {3}",
+                _Logger.LogInformation("Запрос местоположений для родительского положения {ParentPositionId} выполнен успешно за {ElapsedMs}мс. Получено мест {DataLength}. Всего мест {TotalCount}.",
                     ParentPositionId, timer.ElapsedMilliseconds, result.Result.Data.Count, result.Result.TotalCount);
 
         var positions = result
@@ -339,11 +344,11 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
 
         if (_Logger.IsEnabled(LogLevel.Information))
             if (PositionId is null)
-                _Logger.LogInformation("Запрос устройств выполнен успешно за {0}мс. Получено устройств {1}. Всего устройств {2}",
+                _Logger.LogInformation("Запрос устройств выполнен успешно за {ElapsedMs}мс. Получено устройств {DataLength}. Всего устройств {TotalCount}.",
                     timer.ElapsedMilliseconds,
                     result.Result.Data.Length, result.Result.TotalCount);
             else
-                _Logger.LogInformation("Запрос устройств для положения {0} выполнен успешно за {1}мс. Получено устройств {2}. Всего устройств {3}",
+                _Logger.LogInformation("Запрос устройств для положения {PositionId} выполнен успешно за {ElapsedMs}мс. Получено устройств {DataLength}. Всего устройств {TotalCount}.",
                     PositionId, timer.ElapsedMilliseconds, result.Result.Data.Length, result.Result.TotalCount);
 
 
@@ -421,13 +426,13 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
 
         if (_Logger.IsEnabled(LogLevel.Information))
             if (ResourceId is null)
-                _Logger.LogInformation("Запрос параметров для модели {0} выполнен успешно за {1}мс. Получено параметров {2}.",
+                _Logger.LogInformation("Запрос параметров для модели {Model} выполнен успешно за {ElapsedMs}мс. Получено параметров {DataLength}.",
                     Model, timer.ElapsedMilliseconds, result.Result.Length);
             else
-                _Logger.LogInformation("Запрос параметров для модели {0} ({1}) выполнен успешно за {2}мс. Получено параметров {3}.",
+                _Logger.LogInformation("Запрос параметров для модели {Model} ({ResourceId}) выполнен успешно за {ElapsedMs}мс. Получено параметров {DataLength}.",
                     Model, ResourceId, timer.ElapsedMilliseconds, result.Result.Length);
 
-        return result
+        return [.. result
            .Result
            .Select(info => new DeviceFeatureInfo
            {
@@ -450,8 +455,7 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
                    2 => DeviceFeatureAccess.ReadWrite,
                    _ => (DeviceFeatureAccess)info.Access
                },
-           })
-           .ToArray();
+           })];
     }
 
     /// <summary>Получить статистические данные о параметрах устройства</summary>
@@ -476,14 +480,14 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
         int? Size = null,
         CancellationToken Cancel = default)
     {
-        var features = FeatureId as IReadOnlyCollection<string> ?? FeatureId.ToArray();
+        var features = FeatureId as IReadOnlyCollection<string> ?? [.. FeatureId];
 
         List<int> aggregation_type;
         if (AggregationType is FeatureStatisticAggregationType.All or FeatureStatisticAggregationType.All2)
-            aggregation_type = new List<int> { 0, 1, 2, 3, 4 };
+            aggregation_type = [0, 1, 2, 3, 4];
         else
         {
-            aggregation_type = new List<int>();
+            aggregation_type = [];
 
             if ((AggregationType & FeatureStatisticAggregationType.Difference) == FeatureStatisticAggregationType.Difference)
                 aggregation_type.Add(0);
@@ -545,12 +549,12 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
 
         if (_Logger.IsEnabled(LogLevel.Information))
             _Logger.LogInformation(
-                "Запрос статистики устройства {0} для параметров {1} выполнен успешно за {2}мс. " +
-                "Интервал сбора статистики {3} - {4}. " +
-                "Разрешающая способность {5}. " +
-                "Тип значений {6}. " +
-                "Размер выборки {7}. " +
-                "Получено значений {8}.",
+                "Запрос статистики устройства {DeviceId} для параметров {features} выполнен успешно за {ElapsedMs}мс. " +
+                "Интервал сбора статистики {StartTime} - {EndTime}. " +
+                "Разрешающая способность {Dimension}. " +
+                "Тип значений {AggregationType}. " +
+                "Размер выборки {Size}. " +
+                "Получено значений {DataLength}.",
                 DeviceId,
                 string.Join(',', features),
                 timer.ElapsedMilliseconds,
@@ -558,7 +562,7 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
                 Dimension, AggregationType, Size,
                 result.Result.Data.Length);
 
-        return result
+        return [.. result
            .Result
            .Data
            .Select(info => new StatisticValueInfo
@@ -578,8 +582,7 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
                    4 => StatisticValueType.Frequency,
                    _ => (StatisticValueType)info.AggrType
                },
-           })
-           .ToArray();
+           })];
     }
 
     /// <summary>Получить значения параметров указанных устройств</summary>
@@ -614,12 +617,12 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
             };
 
         if (_Logger.IsEnabled(LogLevel.Information))
-            _Logger.LogInformation("Запрос значений параметров ({1}) выполнен за {0}мс. Получено значений {2}",
-                timer.ElapsedMilliseconds,
+            _Logger.LogInformation("Запрос значений параметров ({Features}) выполнен за {ElapsedMs}мс. Получено значений {DataLength}",
                 string.Join(';', Features.Select(f => $"{f.DeviceId},{string.Join(',', f.FeatureId)}")),
+                timer.ElapsedMilliseconds,
                 result.Result.Length);
 
-        return result
+        return [.. result
            .Result
            .Select(value => new DeviceFeatureValue
            {
@@ -627,8 +630,7 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
                FeatureId = value.FeatureId,
                Time = TimeEx.UnixTimeFromTicks(value.TimeStamp),
                Value = double.Parse(value.Value, CultureInfo.InvariantCulture)
-           })
-           .ToArray();
+           })];
     }
 
     /// <summary>Установка значения параметров устройств</summary>
@@ -667,7 +669,7 @@ public class AqaraClient(HttpClient Client, IAccessTokenSource AccessTokenSource
             {
                 RequestData = data,
                 ResponseData = result,
-                ErrorValues = result.Results.Where(r => r.Error != 0).ToArray(),
+                ErrorValues = [.. result.Results.Where(r => r.Error != 0)],
             };
     }
 }

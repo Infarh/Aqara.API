@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel;
+
 using Aqara.API.Exceptions;
 using Aqara.API.Models;
 
 namespace Aqara.API;
 
+/// <summary>Клиент для работы с API Aqara</summary>
 public interface IAqaraClient
 {
     /// <summary>Запрос кода авторизации</summary>
@@ -54,7 +56,11 @@ public interface IAqaraClient
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Массив местоположений</returns>
     /// <exception cref="GetPositionsException">В случае если не удалось получить данные от сервиса</exception>
-    Task<(PositionInfo[] Positions, int TotalCount)> GetPositions(string? ParentPositionId = null, int? Page = 1, int? PageSize = 30, CancellationToken Cancel = default);
+    Task<(PositionInfo[] Positions, int TotalCount)> GetPositions(
+        string? ParentPositionId = null,
+        int? Page = 1,
+        int? PageSize = 30,
+        CancellationToken Cancel = default);
 
     /// <summary>Получить перечень устройств по заданному местоположению (если положеие не указано, то возвращается полный список устройств</summary>
     /// <param name="PositionId">Идентификатор местоположения (если не указан, то будет возвращён полный список всех устройств)</param>
@@ -63,7 +69,11 @@ public interface IAqaraClient
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Массив устройств указанного местоположения</returns>
     /// <exception cref="GetDevicesByPositionException">В случае если не удалось получить данные от сервиса</exception>
-    Task<(DeviceInfo[] Devices, int TotalCount)> GetDevicesByPosition(string? PositionId = null, int? Page = 1, int PageSize = 30, CancellationToken Cancel = default);
+    Task<(DeviceInfo[] Devices, int TotalCount)> GetDevicesByPosition(
+        string? PositionId = null,
+        int? Page = 1,
+        int PageSize = 30,
+        CancellationToken Cancel = default);
 
     /// <summary>Получить перечень возможностей устройства</summary>
     /// <param name="Model">Идентификатор модели устройства</param>
@@ -108,7 +118,11 @@ public interface IAqaraClient
     /// <returns>Задача установки значения параметров</returns>
     /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
     Task SetDevicesFeaturesValues((string DeviceId, (string FeatureId, double Value)[] Values)[] Values, CancellationToken Cancel = default);
+
+    /// <summary>Проверка необходимости авторизации</summary>
     ValueTask<bool> IsAuthorisationNeeded(CancellationToken Cancel = default);
+
+    /// <summary>Проверка валидности токена доступа</summary>
     ValueTask<bool> IsAccessTokenValid(CancellationToken Cancel = default);
 }
 
@@ -120,7 +134,14 @@ public static class AqaraClientExtensions
     /// <param name="FeaturesIds">Идентификаторы требуемых параметров</param>
     /// <returns>Массив значений запрошенных параметров</returns>
     /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
-    public static async Task<DeviceFeatureValue[]> GetDeviceFeaturesValues(this IAqaraClient client, string DeviceId, params string[] FeaturesIds) => await client.GetDevicesFeaturesValues(new[] { (DeviceId, FeaturesIds) }).ConfigureAwait(false);
+    public static async Task<DeviceFeatureValue[]> GetDeviceFeaturesValues(
+        this IAqaraClient client,
+        string DeviceId,
+        params string[] FeaturesIds)
+    {
+        var features = await client.GetDevicesFeaturesValues([(DeviceId, FeaturesIds)]).ConfigureAwait(false);
+        return features;
+    }
 
     /// <summary>Получить значения параметров устройства</summary>
     /// <param name="client">Клиент Aqara API</param>
@@ -129,7 +150,14 @@ public static class AqaraClientExtensions
     /// <param name="FeaturesIds">Идентификаторы требуемых параметров</param>
     /// <returns>Массив значений параметров устройства</returns>
     /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
-    public static async Task<DeviceFeatureValue[]> GetDeviceFeaturesValues(this IAqaraClient client, CancellationToken Cancel, string DeviceId, params string[] FeaturesIds) => await client.GetDevicesFeaturesValues(new[] { (DeviceId, FeaturesIds) }, Cancel).ConfigureAwait(false);
+    public static async Task<DeviceFeatureValue[]> GetDeviceFeaturesValues(
+        this IAqaraClient client,
+        CancellationToken Cancel,
+        string DeviceId,
+        params string[] FeaturesIds)
+    {
+        return await client.GetDevicesFeaturesValues([(DeviceId, FeaturesIds)], Cancel).ConfigureAwait(false);
+    }
 
     /// <summary>Получить значение параметра устройства</summary>
     /// <param name="client">Клиент Aqara API</param>
@@ -138,7 +166,11 @@ public static class AqaraClientExtensions
     /// <param name="Cancel">Флаг отмены асинхронной операции</param>
     /// <returns>Значение параметра</returns>
     /// <exception cref="SetDevicesFeaturesValuesException">В случае если не удалось получить данные от сервиса</exception>
-    public static async Task<DeviceFeatureValue> GetDeviceFeatureValue(this IAqaraClient client, string DeviceId, string FeatureId, CancellationToken Cancel = default)
+    public static async Task<DeviceFeatureValue> GetDeviceFeatureValue(
+        this IAqaraClient client,
+        string DeviceId,
+        string FeatureId,
+        CancellationToken Cancel = default)
     {
         var values = await client.GetDeviceFeaturesValues(Cancel, DeviceId, FeatureId).ConfigureAwait(false);
         return values[0];
@@ -150,9 +182,28 @@ public static class AqaraClientExtensions
     /// <param name="DeviceId">Идентификатор устройства</param>
     /// <param name="Values">Устанавливаемые параметры</param>
     /// <returns>Задача установки параметров устройства</returns>
-    public static async Task SetDeviceFeaturesValues(this IAqaraClient client, CancellationToken Cancel, string DeviceId, params (string FeatureId, double Value)[] Values)
+    public static async Task SetDeviceFeaturesValues(
+        this IAqaraClient client,
+        CancellationToken Cancel,
+        string DeviceId,
+        params (string FeatureId, double Value)[] Values)
     {
-        await client.SetDevicesFeaturesValues(new[] { (DeviceId, Values) }, Cancel).ConfigureAwait(false);
+        await client.SetDevicesFeaturesValues([(DeviceId, Values)], Cancel).ConfigureAwait(false);
+    }
+
+    /// <summary>Установка значения параметров устройства</summary>
+    /// <param name="client">Клиент Aqara API</param>
+    /// <param name="Cancel">Флаг отмены асинхронной операции</param>
+    /// <param name="DeviceId">Идентификатор устройства</param>
+    /// <param name="Feature">Устанавливаемый параметр</param>
+    /// <returns>Задача установки параметров устройства</returns>
+    public static async Task SetDeviceFeaturesValues(
+        this IAqaraClient client,
+        CancellationToken Cancel,
+        string DeviceId,
+        (string FeatureId, double Value) Feature)
+    {
+        await client.SetDevicesFeaturesValues([(DeviceId, new[] { Feature })], Cancel).ConfigureAwait(false);
     }
 
     /// <summary>Установка значения параметров устройства</summary>
@@ -162,8 +213,13 @@ public static class AqaraClientExtensions
     /// <param name="FeatureId">Идентификатор параметра</param>
     /// <param name="Value">Значение параметра</param>
     /// <returns>Задача установки параметров устройства</returns>
-    public static async Task SetDeviceFeaturesValues(this IAqaraClient client, CancellationToken Cancel, string DeviceId, string FeatureId, double Value)
+    public static async Task SetDeviceFeaturesValues(
+        this IAqaraClient client,
+        CancellationToken Cancel,
+        string DeviceId,
+        string FeatureId,
+        double Value)
     {
-        await client.SetDevicesFeaturesValues(new[] { (DeviceId, new []{ (FeatureId, Value) }) }, Cancel).ConfigureAwait(false);
+        await client.SetDevicesFeaturesValues([(DeviceId, new[] { (FeatureId, Value) })], Cancel).ConfigureAwait(false);
     }
 }

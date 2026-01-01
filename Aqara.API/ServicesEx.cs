@@ -9,8 +9,15 @@ using Microsoft.Extensions.Options;
 
 namespace Aqara.API;
 
+/// <summary>Расширения для регистрации сервисов Aqara в контейнере зависимостей</summary>
 public static class ServicesEx
 {
+    /// <summary>Регистрация сервисов Aqara в контейнере зависимостей</summary>
+    /// <param name="Services">Коллекция сервисов</param>
+    /// <param name="AqaraOptions">Конфигурация Aqara</param>
+    /// <returns>Коллекция сервисов</returns>
+    /// <exception cref="ArgumentNullException">Если <paramref name="Services"/> или <paramref name="AqaraOptions"/> равны <c>null</c></exception>
+    /// <remarks>Метод регистрирует все необходимые сервисы для работы с API Aqara</remarks>
     public static IServiceCollection AddAqaraServices(this IServiceCollection Services, IConfiguration AqaraOptions)
     {
         Services.AddOptions<AqaraClientConfig>()

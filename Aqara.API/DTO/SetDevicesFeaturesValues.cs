@@ -8,7 +8,7 @@ public class SetDevicesFeaturesValuesRequest
     public SetDevicesFeaturesValuesRequest() { }
 
     public SetDevicesFeaturesValuesRequest((string DeviceId, (string FeatureId, double Value)[] Values)[] Values) =>
-        Data = Values.Select(device => new SetDevicesFeaturesValuesRequestData(device.DeviceId, device.Values)).ToArray();
+        Data = [.. Values.Select(device => new SetDevicesFeaturesValuesRequestData(device.DeviceId, device.Values))];
 
     [JsonPropertyName("intent")]
     public string Intent => Addresses.Resource.ControlDevice;
@@ -23,7 +23,7 @@ public class SetDevicesFeaturesValuesRequest
         public SetDevicesFeaturesValuesRequestData(string DeviceId, (string FeatureId, double Value)[] Values)
         {
             this.DeviceId = DeviceId;
-            Features = Values.Select(value => new FeatureValue(value.FeatureId, value.Value.ToString(CultureInfo.InvariantCulture))).ToArray();
+            Features = [.. Values.Select(value => new FeatureValue(value.FeatureId, value.Value.ToString(CultureInfo.InvariantCulture)))];
         }
 
         [JsonPropertyName("subjectId")]

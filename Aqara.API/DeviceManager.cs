@@ -7,47 +7,66 @@ using Microsoft.Extensions.Logging;
 
 namespace Aqara.API;
 
+/// <summary>Менеджер устройств, представляющий контракт для получения и поиска устройств</summary>
 public interface IDeviceManager
 {
+    /// <summary>Клиент API для взаимодействия с сервером Aqara</summary>
     IAqaraClient API { get; }
 
-    Task Authorize(string Account, string? Code = null);
+    /// <summary>Авторизует аккаунт пользователя по коду или инициирует получение ключа авторизации</summary>
+    /// <param name="Account">Идентификатор аккаунта</param>
+    /// <param name="Code">Код подтверждения, если известен</param>
+    Task Authorize(string Account, string? Code = null, CancellationToken Cancel = default);
 
-    Task<ICollection<Device>> GetDevices();
+    /// <summary>Возвращает коллекцию устройств, доступных в аккаунте</summary>
+    /// <returns>Коллекция найденных устройств</returns>
+    Task<ICollection<Device>> GetDevices(CancellationToken Cancel = default);
 
-    ValueTask<Device?> GetDeviceById(string Id);
+    /// <summary>Находит устройство по его уникальному идентификатору</summary>
+    /// <param name="Id">Уникальный идентификатор устройства</param>
+    /// <returns>Экземпляр устройства или null если не найдено</returns>
+    ValueTask<Device?> GetDeviceById(string Id, CancellationToken Cancel = default);
 
-    ValueTask<Device?> GetDeviceByName(string Name);
+    /// <summary>Находит устройство по его имени</summary>
+    /// <param name="Name">Имя устройства</param>
+    /// <returns>Экземпляр устройства или null если не найдено</returns>
+    ValueTask<Device?> GetDeviceByName(string Name, CancellationToken Cancel = default);
 }
 
-public class DeviceManager : IDeviceManager
+/// <summary>Реализация менеджера устройств с кешированием и поиском по id и имени</summary>
+/// <param name="Client">Экземпляр API клиента</param>
+/// <param name="Logger">Логгер для вывода сообщений</param>
+public class DeviceManager(IAqaraClient Client, ILogger<DeviceManager> Logger) : IDeviceManager
 {
-    private readonly IAqaraClient _Client;
-    private readonly ILogger<DeviceManager> _Logger;
+    private readonly ILogger<DeviceManager> _Logger = Logger;
+
+    private readonly Lock _DevicesLock = new();
 
     private readonly ConcurrentDictionary<DeviceInfo, Device> _Devices = new();
+
     private readonly ConcurrentDictionary<string, Device> _DeviceId = new();
+
     private readonly ConcurrentDictionary<string, Device> _DeviceNames = new();
 
-    public IAqaraClient API => _Client;
+    /// <summary>Клиент API для взаимодействия с сервером Aqara</summary>
+    public IAqaraClient API => Client;
 
-    public DeviceManager(IAqaraClient Client, ILogger<DeviceManager> Logger)
-    {
-        _Client = Client;
-        _Logger = Logger;
-    }
-
-    public async Task Authorize(string Account, string? Code = null)
+    /// <summary>Авторизует аккаунт пользователя по коду или инициирует получение ключа авторизации</summary>
+    /// <param name="Account">Идентификатор аккаунта</param>
+    /// <param name="Code">Код подтверждения, если известен</param>
+    public async Task Authorize(string Account, string? Code = null, CancellationToken Cancel = default)
     {
         if (Code is not { Length: > 0 })
-            await _Client.GetAuthorizationKey(Account).ConfigureAwait(false);
+            await Client.GetAuthorizationKey(Account, Cancel: Cancel).ConfigureAwait(false);
         else
-            await _Client.GetAccessToken(Code, Account).ConfigureAwait(false);
+            await Client.GetAccessToken(Code, Account, Cancel: Cancel).ConfigureAwait(false);
     }
 
-    public async Task<ICollection<Device>> GetDevices()
+    /// <summary>Загружает все устройства из API и обновляет локальный кеш</summary>
+    /// <returns>Коллекция текущих устройств в кеше</returns>
+    public async Task<ICollection<Device>> GetDevices(CancellationToken Cancel = default)
     {
-        var (response, total_count) = await _Client.GetDevicesByPosition().ConfigureAwait(false);
+        var (response, total_count) = await Client.GetDevicesByPosition(Cancel: Cancel).ConfigureAwait(false);
         var received_count = response.Length;
 
         var ids = new HashSet<string>(total_count);
@@ -61,7 +80,7 @@ public class DeviceManager : IDeviceManager
         var page = 2;
         while (received_count < total_count)
         {
-            var (result, _) = await _Client.GetDevicesByPosition(Page: page);
+            var (result, _) = await Client.GetDevicesByPosition(Page: page, Cancel: Cancel).ConfigureAwait(false);
 
             if (result.Length == 0) break;
 
@@ -83,7 +102,7 @@ public class DeviceManager : IDeviceManager
     {
         foreach (var known in _Devices.Keys.ToArray())
             if (!ExistIds.Contains(known.Id))
-                lock (_Devices)
+                lock (_DevicesLock)
                 {
                     _Devices.TryRemove(known, out _);
                     _DeviceId.TryRemove(known.Id, out _);
@@ -94,7 +113,7 @@ public class DeviceManager : IDeviceManager
     private void AddDevice(DeviceInfo Info)
     {
         if (_Devices.ContainsKey(Info)) return;
-        lock (_Devices)
+        lock (_DevicesLock)
         {
             var device = Device.Create(this, Info);
             _Devices[Info] = device;
@@ -103,18 +122,24 @@ public class DeviceManager : IDeviceManager
         }
     }
 
-    public async ValueTask<Device?> GetDeviceById(string Id)
+    /// <summary>Ищет устройство по уникальному идентификатору, при пустом стане кеша загружает список устройств</summary>
+    /// <param name="Id">Уникальный идентификатор устройства</param>
+    /// <returns>Найденное устройство или null</returns>
+    public async ValueTask<Device?> GetDeviceById(string Id, CancellationToken Cancel = default)
     {
-        if (_Devices.Count == 0)
-            await GetDevices().ConfigureAwait(false);
+        if (_Devices.IsEmpty)
+            await GetDevices(Cancel).ConfigureAwait(false);
 
         return _DeviceId.TryGetValue(Id, out var device) ? device : null;
     }
 
-    public async ValueTask<Device?> GetDeviceByName(string Name)
+    /// <summary>Ищет устройство по имени, при пустом стане кеша загружает список устройств</summary>
+    /// <param name="Name">Имя устройства</param>
+    /// <returns>Найденное устройство или null</returns>
+    public async ValueTask<Device?> GetDeviceByName(string Name, CancellationToken Cancel = default)
     {
-        if (_Devices.Count == 0)
-            await GetDevices().ConfigureAwait(false);
+        if (_Devices.IsEmpty)
+            await GetDevices(Cancel).ConfigureAwait(false);
 
         return _DeviceNames.TryGetValue(Name, out var device) ? device : null;
     }

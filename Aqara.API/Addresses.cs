@@ -2,328 +2,338 @@
 
 namespace Aqara.API;
 
+/// <summary>Содержит константы адресов (ключей) методов API Aqara</summary>
 public static class Addresses
 {
+    /// <summary>Операции, связанные с авторизацией</summary>
     public static class Auth
     {
-        ///<summary>Create a virtual account</summary>
-        [Description("Create a virtual account")]
+        ///<summary>Создать виртуальный аккаунт</summary>
+        [Description("Создать виртуальный аккаунт")]
         public const string CreateVirtualAccount = "config.auth.createAccount";
-        
-        ///<summary>Get authorization verification code</summary>
-        [Description("Get authorization verification code")]
+
+        ///<summary>Получить код подтверждения авторизации</summary>
+        [Description("Получить код подтверждения авторизации")]
         public const string GetAuthorizationVerificationCode = "config.auth.getAuthCode";
-        
-        ///<summary>Obtain access-token</summary>
-        [Description("Obtain access-token")]
+
+        ///<summary>Получить токен доступа</summary>
+        [Description("Получить токен доступа")]
         public const string ObtainAccessToken = "config.auth.getToken";
-        
-        ///<summary>Refresh access token</summary>
-        [Description("Refresh access token")]
+
+        ///<summary>Обновить токен доступа</summary>
+        [Description("Обновить токен доступа")]
         public const string RefreshAccessToken = "config.auth.refreshToken";
     }
 
+    /// <summary>Операции, связанные с позициями и местоположениями</summary>
     public static class Position
     {
-        ///<summary>Create a position</summary>
-        [Description("Create a position")]
+        ///<summary>Создать позицию</summary>
+        [Description("Создать позицию")]
         public const string CreatePosition = "config.position.create";
-        
-        ///<summary>Delete position</summary>
-        [Description("Delete position")]
+
+        ///<summary>Удалить позицию</summary>
+        [Description("Удалить позицию")]
         public const string DeletePosition = "config.position.delete";
-        
-        ///<summary>Update position information</summary>
-        [Description("Update position information")]
+
+        ///<summary>Обновить информацию позиции</summary>
+        [Description("Обновить информацию позиции")]
         public const string UpdatePositionInformation = "config.position.update";
-        
-        ///<summary>Update position timezone</summary>
-        [Description("Update position timezone")]
+
+        ///<summary>Обновить часовой пояс позиции</summary>
+        [Description("Обновить часовой пояс позиции")]
         public const string UpdatePositionTimezone = "config.position.timeZone";
-        
-        ///<summary>Query the subordinate position information of the current parent position</summary>
-        [Description("Query the subordinate position information of the current parent position")]
+
+        ///<summary>Запросить информацию о подчинённых позициях текущей родительской позиции</summary>
+        [Description("Запросить информацию о подчинённых позициях текущей родительской позиции")]
         public const string QueryTheSubordinatePositionInformationOfTheCurrentParentPosition = "query.position.info";
-        
-        ///<summary>Query position detail</summary>
-        [Description("Query position detail")]
+
+        ///<summary>Запросить подробности позиции</summary>
+        [Description("Запросить подробности позиции")]
         public const string QueryPositionDetail = "query.position.detail";
-        
-        ///<summary>Query the list of gateways that support sub-devices based on location</summary>
-        [Description("Query the list of gateways that support sub-devices based on location")]
+
+        ///<summary>Запросить список шлюзов, поддерживающих подустройства, по местоположению</summary>
+        [Description("Запросить список шлюзов, поддерживающих подустройства, по местоположению")]
         public const string QueryTheListOfGatewaysThatSupportSubDevicesBasedOnLocation = "query.position.supportGateway";
     }
 
+    /// <summary>Операции, связанные с устройствами</summary>
     public static class Device
     {
-        ///<summary>Obtain temporary credentials(bindKey) before the device is registered</summary>
-        [Description("Obtain temporary credentials(bindKey) before the device is registered")]
+        ///<summary>Получить временные учётные данные (bindKey) перед регистрацией устройства</summary>
+        [Description("Получить временные учётные данные (bindKey) перед регистрацией устройства")]
         public const string ObtainTemporaryCredentialsBindKeyBeforeTheDeviceIsRegistered = "query.device.bindKey";
-        
-        ///<summary>Device registration status query</summary>
-        [Description("Device registration status query")]
+
+        ///<summary>Запрос статуса регистрации устройства</summary>
+        [Description("Запрос статуса регистрации устройства")]
         public const string DeviceRegistrationStatusQuery = "query.device.bind";
-        
-        ///<summary>Query device information</summary>
-        [Description("Query device information")]
+
+        ///<summary>Запросить информацию об устройстве</summary>
+        [Description("Запросить информацию об устройстве")]
         public const string QueryDeviceInformation = "query.device.info";
-        
-        ///<summary>Query sub-device information based on the Gateway</summary>
-        [Description("Query sub-device information based on the Gateway")]
+
+        ///<summary>Запросить информацию о подустройствах по шлюзу</summary>
+        [Description("Запросить информацию о подустройствах по шлюзу")]
         public const string QuerySubDeviceInformationBasedOnTheGateway = "query.device.subInfo";
-        
-        ///<summary>Update device information</summary>
-        [Description("Update device information")]
+
+        ///<summary>Обновить информацию об устройстве</summary>
+        [Description("Обновить информацию об устройстве")]
         public const string UpdateDeviceInformation = "config.device.name";
-        
-        ///<summary>Update device position</summary>
-        [Description("Update device position")]
+
+        ///<summary>Обновить местоположение устройства</summary>
+        [Description("Обновить местоположение устройства")]
         public const string UpdateDevicePosition = "config.device.position";
-        
-        ///<summary>Enable Hub to add subdevice mode</summary>
-        [Description("Enable Hub to add subdevice mode")]
+
+        ///<summary>Включить режим добавления подустройств на хабе</summary>
+        [Description("Включить режим добавления подустройств на хабе")]
         public const string EnableHubToAddSubdeviceMode = "write.device.openConnect";
-        
-        ///<summary>Disable Hub to add subdevice mode</summary>
-        [Description("Disable Hub to add subdevice mode")]
+
+        ///<summary>Отключить режим добавления подустройств на хабе</summary>
+        [Description("Отключить режим добавления подустройств на хабе")]
         public const string DisableHubToAddSubdeviceMode = "write.device.closeConnect";
-        
-        ///<summary>Query the list of gateways that support sub-devices</summary>
-        [Description("Query the list of gateways that support sub-devices")]
+
+        ///<summary>Запросить список шлюзов, поддерживающих подустройства</summary>
+        [Description("Запросить список шлюзов, поддерживающих подустройства")]
         public const string QueryTheListOfGatewaysThatSupportSubDevices = "query.device.supportGateway";
-        
-        ///<summary>Unbind device</summary>
-        [Description("Unbind device")]
+
+        ///<summary>Отвязать устройство</summary>
+        [Description("Отвязать устройство")]
         public const string UnbindDevice = "write.device.unbind";
     }
 
+    /// <summary>Операции, связанные с ресурсами и атрибутами устройств</summary>
     public static class Resource
     {
-        ///<summary>Query the details of the attributes that have been opened</summary>
-        [Description("Query the details of the attributes that have been opened")]
+        ///<summary>Запросить детали открытых атрибутов</summary>
+        [Description("Запросить детали открытых атрибутов")]
         public const string QueryTheDetailsOfTheAttributesThatHaveBeenOpened = "query.resource.info";
-        
-        ///<summary>Query device attribute name</summary>
-        [Description("Query device attribute name")]
+
+        ///<summary>Запросить имя атрибута устройства</summary>
+        [Description("Запросить имя атрибута устройства")]
         public const string QueryDeviceAttributeName = "query.resource.name";
-        
-        ///<summary>Modify device attribute information</summary>
-        [Description("Modify device attribute information")]
+
+        ///<summary>Изменить информацию об атрибуте устройства</summary>
+        [Description("Изменить информацию об атрибуте устройства")]
         public const string ModifyDeviceAttributeInformation = "config.resource.info";
-        
-        ///<summary>Query device attribute</summary>
-        [Description("Query device attribute")]
+
+        ///<summary>Запросить значение атрибута устройства</summary>
+        [Description("Запросить значение атрибута устройства")]
         public const string QueryDeviceAttribute = "query.resource.value";
-        
-        ///<summary>Control device</summary>
-        [Description("Control device")]
+
+        ///<summary>Управлять устройством</summary>
+        [Description("Управлять устройством")]
         public const string ControlDevice = "write.resource.device";
-        
-        ///<summary>Query the history of device attributes</summary>
-        [Description("Query the history of device attributes")]
+
+        ///<summary>Запросить историю атрибутов устройства</summary>
+        [Description("Запросить историю атрибутов устройства")]
         public const string QueryTheHistoryOfDeviceAttributes = "fetch.resource.history";
-        
-        ///<summary>Query the statistical history value of the device attribute</summary>
-        [Description("Query the statistical history value of the device attribute")]
+
+        ///<summary>Запросить статистические исторические значения атрибута устройства</summary>
+        [Description("Запросить статистические исторические значения атрибута устройства")]
         public const string QueryTheStatisticalHistoryValueOfTheDeviceAttribute = "fetch.resource.statistics";
-        
-        ///<summary>Subscribe device attribute</summary>
-        [Description("Subscribe device attribute")]
+
+        ///<summary>Подписаться на атрибут устройства</summary>
+        [Description("Подписаться на атрибут устройства")]
         public const string SubscribeDeviceAttribute = "config.resource.subscribe";
-        
-        ///<summary>Unsubscribe device resource</summary>
-        [Description("Unsubscribe device resource")]
+
+        ///<summary>Отписаться от ресурса устройства</summary>
+        [Description("Отписаться от ресурса устройства")]
         public const string UnsubscribeDeviceResource = "config.resource.unsubscribe";
     }
 
+    /// <summary>Операции IFTTT</summary>
     public static class IFTTT
     {
-        ///<summary>Query what triggers the specified object type has (IF)</summary>
-        [Description("Query what triggers the specified object type has (IF)")]
+        ///<summary>Запросить, какие триггеры есть у указанного типа объекта (IF)</summary>
+        [Description("Запросить, какие триггеры есть у указанного типа объекта (IF)")]
         public const string QueryWhatTriggersTheSpecifiedObjectTypeHasIf = "query.ifttt.trigger";
-        
-        ///<summary>Query what actions the specified object type has (Then)</summary>
-        [Description("Query what actions the specified object type has (Then)")]
+
+        ///<summary>Запросить, какие действия есть у указанного типа объекта (Then)</summary>
+        [Description("Запросить, какие действия есть у указанного типа объекта (Then)")]
         public const string QueryWhatActionsTheSpecifiedObjectTypeHasThen = "query.ifttt.action";
     }
 
+    /// <summary>Операции, связанные со связками и автоматизациями</summary>
     public static class Linkage
     {
-        ///<summary>Create linkage</summary>
-        [Description("Create linkage")]
+        ///<summary>Создать связку</summary>
+        [Description("Создать связку")]
         public const string CreateLinkage = "config.linkage.create";
-        
-        ///<summary>Query detail information of the linkage</summary>
-        [Description("Query detail information of the linkage")]
+
+        ///<summary>Запросить подробную информацию о связке</summary>
+        [Description("Запросить подробную информацию о связке")]
         public const string QueryDetailInformationOfTheLinkage = "query.linkage.detail";
-        
-        ///<summary>Update linkage</summary>
-        [Description("Update linkage")]
+
+        ///<summary>Обновить связку</summary>
+        [Description("Обновить связку")]
         public const string UpdateLinkage = "config.linkage.update";
-        
-        ///<summary>Delete linkage</summary>
-        [Description("Delete linkage")]
+
+        ///<summary>Удалить связку</summary>
+        [Description("Удалить связку")]
         public const string DeleteLinkage = "config.linkage.delete";
-        
-        ///<summary>Enable/disable linkage</summary>
-        [Description("Enable/disable linkage")]
+
+        ///<summary>Включить/отключить связку</summary>
+        [Description("Включить/отключить связку")]
         public const string EnableDisableLinkage = "config.linkage.enable";
-        
-        ///<summary>Query linkage list based on location</summary>
-        [Description("Query linkage list based on location")]
+
+        ///<summary>Запросить список связок по местоположению</summary>
+        [Description("Запросить список связок по местоположению")]
         public const string QueryLinkageListBasedOnLocation = "query.linkage.listByPositionId";
-        
-        ///<summary>Query linkage list based on object ID</summary>
-        [Description("Query linkage list based on object ID")]
+
+        ///<summary>Запросить список связок по идентификатору объекта</summary>
+        [Description("Запросить список связок по идентификатору объекта")]
         public const string QueryLinkageListBasedOnObjectID = "query.linkage.listBySubjectId";
     }
 
+    /// <summary>Операции, связанные со сценами</summary>
     public static class Scene
     {
-        ///<summary>Create scene</summary>
-        [Description("Create scene")]
+        ///<summary>Создать сцену</summary>
+        [Description("Создать сцену")]
         public const string CreateScene = "config.scene.create";
-        
-        ///<summary>Update scene</summary>
-        [Description("Update scene")]
+
+        ///<summary>Обновить сцену</summary>
+        [Description("Обновить сцену")]
         public const string UpdateScene = "config.scene.update";
-        
-        ///<summary>Delete scene</summary>
-        [Description("Delete scene")]
+
+        ///<summary>Удалить сцену</summary>
+        [Description("Удалить сцену")]
         public const string DeleteScene = "config.scene.delete";
-        
-        ///<summary>Execute scene</summary>
-        [Description("Execute scene")]
+
+        ///<summary>Выполнить сцену</summary>
+        [Description("Выполнить сцену")]
         public const string ExecuteScene = "config.scene.run";
-        
-        ///<summary>Query detail information of the scene</summary>
-        [Description("Query detail information of the scene")]
+
+        ///<summary>Запросить подробную информацию о сцене</summary>
+        [Description("Запросить подробную информацию о сцене")]
         public const string QueryDetailInformationOfTheScene = "query.scene.detail";
-        
-        ///<summary>Query scene list based on object ID</summary>
-        [Description("Query scene list based on object ID")]
+
+        ///<summary>Запросить список сцен по идентификатору объекта</summary>
+        [Description("Запросить список сцен по идентификатору объекта")]
         public const string QuerySceneListBasedOnObjectID = "query.scene.listBySubjectId";
-        
-        ///<summary>Query scene list based on location</summary>
-        [Description("Query scene list based on location")]
+
+        ///<summary>Запросить список сцен по местоположению</summary>
+        [Description("Запросить список сцен по местоположению")]
         public const string QuerySceneListBasedOnLocation = "query.scene.listByPositionId";
     }
 
+    /// <summary>Операции, связанные с условиями и событиями</summary>
     public static class Event
     {
-        ///<summary>Create multiple-conditions</summary>
-        [Description("Create multiple-conditions")]
+        ///<summary>Создать множественные условия</summary>
+        [Description("Создать множественные условия")]
         public const string CreateMultipleConditions = "config.event.create";
-        
-        ///<summary>Update multiple-conditions</summary>
-        [Description("Update multiple-conditions")]
+
+        ///<summary>Обновить множественные условия</summary>
+        [Description("Обновить множественные условия")]
         public const string UpdateMultipleConditions = "config.event.update";
-        
-        ///<summary>Delete multiple-conditions</summary>
-        [Description("Delete multiple-conditions")]
+
+        ///<summary>Удалить множественные условия</summary>
+        [Description("Удалить множественные условия")]
         public const string DeleteMultipleConditions = "config.event.delete";
-        
-        ///<summary>Query detail information of multiple-conditions</summary>
-        [Description("Query detail information of multiple-conditions")]
+
+        ///<summary>Запросить подробную информацию о множественных условиях</summary>
+        [Description("Запросить подробную информацию о множественных условиях")]
         public const string QueryDetailInformationOfMultipleConditions = "query.event.detail";
-        
-        ///<summary>Query multiple-conditions based on subject Id</summary>
-        [Description("Query multiple-conditions based on subject Id")]
+
+        ///<summary>Запросить множественные условия по идентификатору объекта</summary>
+        [Description("Запросить множественные условия по идентификатору объекта")]
         public const string QueryMultipleConditionsBasedOnSubjectId = "query.event.listBySubjectId";
-        
-        ///<summary>Query multiple-conditions based on location</summary>
-        [Description("Query multiple-conditions based on location")]
+
+        ///<summary>Запросить множественные условия по местоположению</summary>
+        [Description("Запросить множественные условия по местоположению")]
         public const string QueryMultipleConditionsBasedOnLocation = "query.event.listByPositionId";
     }
 
+    /// <summary>Операции, связанные с OTA и прошивками</summary>
     public static class Ota
     {
-        ///<summary>Query device firmware based on device model</summary>
-        [Description("Query device firmware based on device model")]
+        ///<summary>Запросить прошивку устройства по модели</summary>
+        [Description("Запросить прошивку устройства по модели")]
         public const string QueryDeviceFirmwareBasedOnDeviceModel = "query.ota.firmware";
-        
-        ///<summary>Upgrade firmware (Batch upgrade)</summary>
-        [Description("Upgrade firmware (Batch upgrade)")]
+
+        ///<summary>Обновить прошивку (пакетное обновление)</summary>
+        [Description("Обновить прошивку (пакетное обновление)")]
         public const string UpgradeFirmwareBatchUpgrade = "write.ota.upgrade";
-        
-        ///<summary>Query the upgrade status</summary>
-        [Description("Query the upgrade status")]
+
+        ///<summary>Запросить статус обновления</summary>
+        [Description("Запросить статус обновления")]
         public const string QueryTheUpgradeStatus = "query.ota.upgrade";
     }
 
+    /// <summary>Операции, связанные с инфракрасными устройствами и пультами</summary>
     public static class IR
     {
-        ///<summary>Match tree information</summary>
-        [Description("Match tree information")]
+        ///<summary>Получить информацию соответствия дерева</summary>
+        [Description("Получить информацию соответствия дерева")]
         public const string MatchTreeInformation = "query.ir.match";
-        
-        ///<summary>Obtain device type list</summary>
-        [Description("Obtain device type list")]
+
+        ///<summary>Получить список типов устройств</summary>
+        [Description("Получить список типов устройств")]
         public const string ObtainDeviceTypeList = "query.ir.categories";
-        
-        ///<summary>Query brand list based on device type</summary>
-        [Description("Query brand list based on device type")]
+
+        ///<summary>Запросить список брендов по типу устройства</summary>
+        [Description("Запросить список брендов по типу устройства")]
         public const string QueryBrandListBasedOnDeviceType = "query.ir.brands";
-        
-        ///<summary>Get remote control information</summary>
-        [Description("Get remote control information")]
+
+        ///<summary>Получить информацию о пульте</summary>
+        [Description("Получить информацию о пульте")]
         public const string GetRemoteControlInformation = "query.ir.info";
-        
-        ///<summary>Query the remote control list under the gateway</summary>
-        [Description("Query the remote control list under the gateway")]
+
+        ///<summary>Запросить список пультов под шлюзом</summary>
+        [Description("Запросить список пультов под шлюзом")]
         public const string QueryTheRemoteControlListUnderTheGateway = "query.ir.list";
-        
-        ///<summary>Query the state of the stateful air conditioner</summary>
-        [Description("Query the state of the stateful air conditioner")]
+
+        ///<summary>Запросить состояние кондиционера</summary>
+        [Description("Запросить состояние кондиционера")]
         public const string QueryTheStateOfTheStatefulAirConditioner = "query.ir.acState";
-        
-        ///<summary>Query remote control function</summary>
-        [Description("Query remote control function")]
+
+        ///<summary>Запросить функции пульта</summary>
+        [Description("Запросить функции пульта")]
         public const string QueryRemoteControlFunction = "query.ir.functions";
-        
-        ///<summary>Query remote control buttons</summary>
-        [Description("Query remote control buttons")]
+
+        ///<summary>Запросить кнопки пульта</summary>
+        [Description("Запросить кнопки пульта")]
         public const string QueryRemoteControlButtons = "query.ir.keys";
-        
-        ///<summary>Add remote control</summary>
-        [Description("Add remote control")]
+
+        ///<summary>Добавить пульт</summary>
+        [Description("Добавить пульт")]
         public const string AddRemoteControl = "config.ir.create";
-        
-        ///<summary>Delete remote control</summary>
-        [Description("Delete remote control")]
+
+        ///<summary>Удалить пульт</summary>
+        [Description("Удалить пульт")]
         public const string DeleteRemoteControl = "config.ir.delete";
-        
-        ///<summary>Update remote control</summary>
-        [Description("Update remote control")]
+
+        ///<summary>Обновить пульт</summary>
+        [Description("Обновить пульт")]
         public const string UpdateRemoteControl = "config.ir.update";
-        
-        ///<summary>Add a custom remote</summary>
-        [Description("Add a custom remote")]
+
+        ///<summary>Добавить кастомный пульт</summary>
+        [Description("Добавить кастомный пульт")]
         public const string AddACustomRemote = "config.ir.custom";
-        
-        ///<summary>Click the remote control button</summary>
-        [Description("Click the remote control button")]
+
+        ///<summary>Нажать кнопку пульта</summary>
+        [Description("Нажать кнопку пульта")]
         public const string ClickTheRemoteControlButton = "write.ir.click";
-        
-        ///<summary>Turn on infrared learning</summary>
-        [Description("Turn on infrared learning")]
+
+        ///<summary>Включить инфракрасное обучение</summary>
+        [Description("Включить инфракрасное обучение")]
         public const string TurnOnInfraredLearning = "write.ir.startLearn";
-        
-        ///<summary>Cancel infrared learning</summary>
-        [Description("Cancel infrared learning")]
+
+        ///<summary>Отменить инфракрасное обучение</summary>
+        [Description("Отменить инфракрасное обучение")]
         public const string CancelInfraredLearning = "write.ir.cancelLearn";
-        
-        ///<summary>Query infrared learning results</summary>
-        [Description("Query infrared learning results")]
+
+        ///<summary>Запросить результаты инфракрасного обучения</summary>
+        [Description("Запросить результаты инфракрасного обучения")]
         public const string QueryInfraredLearningResults = "query.ir.learnResult";
     }
 
+    /// <summary>Операции по работе с push-сообщениями</summary>
     public static class Push
     {
-        ///<summary>Query the details of the failed message</summary>
-        [Description("Query the details of the failed message")]
+        ///<summary>Запросить детали неудачного сообщения</summary>
+        [Description("Запросить детали неудачного сообщения")]
         public const string QueryTheDetailsOfTheFailedMessage = "query.push.errorMsg";
     }
-
-
 }

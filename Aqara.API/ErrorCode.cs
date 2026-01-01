@@ -1,5 +1,5 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+
 using EnumFastToStringGenerated;
 
 namespace Aqara.API;
@@ -12,683 +12,683 @@ public enum ErrorCode : short
     [Display(Name = "Неизвестная ошибка")]
     Unknown = -1,
 
-    ///<summary>Success</summary>
+    ///<summary>Успех</summary>
     [Display(Name = "Успех")]
     Success = 0,
-    
-    ///<summary>Timeout</summary>
+
+    ///<summary>Таймаут</summary>
     [Display(Name = "Таймаут")]
     Timeout = 100,
-    
-    ///<summary>Invalid data package</summary>
-    [Display(Name = "Invalid data package")]
+
+    ///<summary>Неверный пакет данных</summary>
+    [Display(Name = "Неверный пакет данных")]
     InvalidDataPackage = 101,
-    
-    ///<summary>Data package has altered</summary>
-    [Display(Name = "Data package has altered")]
+
+    ///<summary>Пакет данных был изменён</summary>
+    [Display(Name = "Пакет данных был изменён")]
     DataPackageHasAltered = 102,
-    
-    ///<summary>Data package may lose</summary>
-    [Display(Name = "Data package may lose")]
+
+    ///<summary>Пакет данных может быть утерян</summary>
+    [Display(Name = "Пакет данных может быть утерян")]
     DataPackageMayLose = 103,
-    
-    ///<summary>Server busy</summary>
-    [Display(Name = "Server busy")]
+
+    ///<summary>Сервер перегружен</summary>
+    [Display(Name = "Сервер перегружен")]
     ServerBusy = 104,
-    
-    ///<summary>Data package has expired</summary>
-    [Display(Name = "Data package has expired")]
+
+    ///<summary>Срок действия пакета данных истёк</summary>
+    [Display(Name = "Срок действия пакета данных истёк")]
     DataPackageHasExpired = 105,
-    
-    ///<summary>Invalid sign</summary>
-    [Display(Name = "Invalid sign")]
+
+    ///<summary>Неверная подпись</summary>
+    [Display(Name = "Неверная подпись")]
     InvalidSign = 106,
-    
-    ///<summary>Illegal appKey</summary>
-    [Display(Name = "Illegal appKey")]
+
+    ///<summary>Недопустимый appKey</summary>
+    [Display(Name = "Недопустимый appKey")]
     IllegalAppKey = 107,
-    
-    ///<summary>Token has expired</summary>
-    [Display(Name = "Token has expired")]
+
+    ///<summary>Токен истёк</summary>
+    [Display(Name = "Токен истёк")]
     TokenHasExpired = 108,
-    
-    ///<summary>Token is absence</summary>
-    [Display(Name = "Token is absence")]
+
+    ///<summary>Токен отсутствует</summary>
+    [Display(Name = "Токен отсутствует")]
     TokenIsAbsence = 109,
-    
-    ///<summary>Params error</summary>
-    [Display(Name = "Params error")]
+
+    ///<summary>Ошибка параметров</summary>
+    [Display(Name = "Ошибка параметров")]
     ParamsError = 302,
-    
-    ///<summary>Request params type error</summary>
-    [Display(Name = "Request params type error")]
+
+    ///<summary>Неверный тип параметров запроса</summary>
+    [Display(Name = "Неверный тип параметров запроса")]
     RequestParamsTypeError = 303,
-    
-    ///<summary>Request method not support</summary>
-    [Display(Name = "Request method not support")]
+
+    ///<summary>Метод запроса не поддерживается</summary>
+    [Display(Name = "Метод запроса не поддерживается")]
     RequestMethodNotSupport = 304,
-    
-    ///<summary>Header Params error</summary>
-    [Display(Name = "Header Params error")]
+
+    ///<summary>Ошибка параметров заголовка</summary>
+    [Display(Name = "Ошибка параметров заголовка")]
     HeaderParamsError = 305,
-    
-    ///<summary>Request path not open</summary>
-    [Display(Name = "Request path not open")]
+
+    ///<summary>Путь запроса не открыт</summary>
+    [Display(Name = "Путь запроса не открыт")]
     RequestPathNotOpen = 306,
-    
-    ///<summary>Request forbidden</summary>
-    [Display(Name = "Request forbidden")]
+
+    ///<summary>Доступ запрещён</summary>
+    [Display(Name = "Доступ запрещён")]
     RequestForbidden = 403,
-    
-    ///<summary>Too Many Requests</summary>
-    [Display(Name = "Too Many Requests")]
+
+    ///<summary>Слишком много запросов</summary>
+    [Display(Name = "Слишком много запросов")]
     TooManyRequests = 429,
-    
-    ///<summary>Service impl error</summary>
-    [Display(Name = "Service impl error")]
+
+    ///<summary>Ошибка реализации сервиса</summary>
+    [Display(Name = "Ошибка реализации сервиса")]
     ServiceImplError = 500,
-    
-    ///<summary>Service proxy error</summary>
-    [Display(Name = "Service proxy error")]
+
+    ///<summary>Ошибка прокси сервиса</summary>
+    [Display(Name = "Ошибка прокси сервиса")]
     ServiceProxyError = 501,
-    
-    ///<summary>Device not register</summary>
-    [Display(Name = "Device not register")]
+
+    ///<summary>Устройство не зарегистрировано</summary>
+    [Display(Name = "Устройство не зарегистрировано")]
     DeviceNotRegister = 601,
-    
-    ///<summary>Device is offline</summary>
-    [Display(Name = "Device is offline")]
+
+    ///<summary>Устройство не в сети</summary>
+    [Display(Name = "Устройство не в сети")]
     DeviceIsOffline = 602,
-    
-    ///<summary>Device permission denied</summary>
-    [Display(Name = "Device permission denied")]
+
+    ///<summary>Отказано в доступе к устройству</summary>
+    [Display(Name = "Отказано в доступе к устройству")]
     DevicePermissionDenied = 603,
-    
-    ///<summary>Illegal device id</summary>
-    [Display(Name = "Illegal device id")]
+
+    ///<summary>Недопустимый идентификатор устройства</summary>
+    [Display(Name = "Недопустимый идентификатор устройства")]
     IllegalDeviceId = 604,
-    
-    ///<summary>Device info inconsistent</summary>
-    [Display(Name = "Device info inconsistent")]
+
+    ///<summary>Несоответствие информации об устройстве</summary>
+    [Display(Name = "Несоответствие информации об устройстве")]
     DeviceInfoInconsistent = 605,
-    
-    ///<summary>Device request not support</summary>
-    [Display(Name = "Device request not support")]
+
+    ///<summary>Запрос устройства не поддерживается</summary>
+    [Display(Name = "Запрос устройства не поддерживается")]
     DeviceRequestNotSupport = 606,
-    
-    ///<summary>Gateway has been bind</summary>
-    [Display(Name = "Gateway has been bind")]
+
+    ///<summary>Шлюз уже привязан</summary>
+    [Display(Name = "Шлюз уже привязан")]
     GatewayHasBeenBind = 607,
-    
-    ///<summary>Sub device bind error</summary>
-    [Display(Name = "Sub device bind error")]
+
+    ///<summary>Ошибка привязки подустройства</summary>
+    [Display(Name = "Ошибка привязки подустройства")]
     SubDeviceBindError = 608,
-    
-    ///<summary>Gateway unbind error</summary>
-    [Display(Name = "Gateway unbind error")]
+
+    ///<summary>Ошибка отвязки шлюза</summary>
+    [Display(Name = "Ошибка отвязки шлюза")]
     GatewayUnbindError = 609,
-    
-    ///<summary>Subdevice unbind error</summary>
-    [Display(Name = "Subdevice unbind error")]
+
+    ///<summary>Ошибка отвязки подустройства</summary>
+    [Display(Name = "Ошибка отвязки подустройства")]
     SubdeviceUnbindError = 610,
-    
-    ///<summary>Subdevice not bind</summary>
-    [Display(Name = "Subdevice not bind")]
+
+    ///<summary>Подустройство не привязано</summary>
+    [Display(Name = "Подустройство не привязано")]
     SubdeviceNotBind = 611,
-    
-    ///<summary>Gateway request not response</summary>
-    [Display(Name = "Gateway request not response")]
+
+    ///<summary>Шлюз не отвечает на запрос</summary>
+    [Display(Name = "Шлюз не отвечает на запрос")]
     GatewayRequestNotResponse = 612,
-    
-    ///<summary>Not find parent device</summary>
-    [Display(Name = "Not find parent device")]
+
+    ///<summary>Родительское устройство не найдено</summary>
+    [Display(Name = "Родительское устройство не найдено")]
     NotFindParentDevice = 615,
-    
-    ///<summary>BindKey time out</summary>
-    [Display(Name = "BindKey time out")]
+
+    ///<summary>Время BindKey истекло</summary>
+    [Display(Name = "Время BindKey истекло")]
     BindKeyTimeOut = 636,
-    
-    ///<summary>Irid not exists</summary>
-    [Display(Name = "Irid not exists")]
+
+    ///<summary>Irid не существует</summary>
+    [Display(Name = "Irid не существует")]
     IridNotExists = 637,
-    
-    ///<summary>Sub device not support this operation</summary>
-    [Display(Name = "Sub device not support this operation")]
+
+    ///<summary>Подустройство не поддерживает эту операцию</summary>
+    [Display(Name = "Подустройство не поддерживает эту операцию")]
     SubDeviceNotSupportThisOperation = 638,
-    
-    ///<summary>Device cannot mount sub device</summary>
-    [Display(Name = "Device cannot mount sub device")]
+
+    ///<summary>Устройство не может подключить подустройство</summary>
+    [Display(Name = "Устройство не может подключить подустройство")]
     DeviceCannotMountSubDevice = 639,
-    
-    ///<summary>Device five code not found</summary>
-    [Display(Name = "Device five code not found")]
+
+    ///<summary>Код устройства не найден</summary>
+    [Display(Name = "Код устройства не найден")]
     DeviceFiveCodeNotFound = 640,
-    
-    ///<summary>Bluetooth device operate with wrong step</summary>
-    [Display(Name = "Bluetooth device operate with wrong step")]
+
+    ///<summary>Неправильный шаг при работе с Bluetooth-устройством</summary>
+    [Display(Name = "Неправильный шаг при работе с Bluetooth-устройством")]
     BluetoothDeviceOperateWithWrongStep = 641,
-    
-    ///<summary>Bluetooth device validate wrong</summary>
-    [Display(Name = "Bluetooth device validate wrong")]
+
+    ///<summary>Ошибка валидации Bluetooth-устройства</summary>
+    [Display(Name = "Ошибка валидации Bluetooth-устройства")]
     BluetoothDeviceValidateWrong = 642,
-    
-    ///<summary>Bluetooth info not exist</summary>
-    [Display(Name = "Bluetooth info not exist")]
+
+    ///<summary>Информация о Bluetooth отсутствует</summary>
+    [Display(Name = "Информация о Bluetooth отсутствует")]
     BluetoothInfoNotExist = 643,
-    
-    ///<summary>Failed validate security code</summary>
-    [Display(Name = "Failed validate security code")]
+
+    ///<summary>Не удалось проверить код безопасности</summary>
+    [Display(Name = "Не удалось проверить код безопасности")]
     FailedValidateSecurityCode = 644,
-    
-    ///<summary>App bluetooth device register wrong step</summary>
-    [Display(Name = "App bluetooth device register wrong step")]
+
+    ///<summary>Неправильный шаг при регистрации Bluetooth-устройства в приложении</summary>
+    [Display(Name = "Неправильный шаг при регистрации Bluetooth-устройства в приложении")]
     AppBluetoothDeviceRegisterWrongStep = 645,
-    
-    ///<summary>Gateway not exists</summary>
-    [Display(Name = "Gateway not exists")]
+
+    ///<summary>Шлюз не существует</summary>
+    [Display(Name = "Шлюз не существует")]
     GatewayNotExists = 651,
-    
-    ///<summary>Gateway limit</summary>
-    [Display(Name = "Gateway limit")]
+
+    ///<summary>Превышен лимит шлюзов</summary>
+    [Display(Name = "Превышен лимит шлюзов")]
     GatewayLimit = 652,
-    
-    ///<summary>dynamic sequence run failed</summary>
-    [Display(Name = "dynamic sequence run failed")]
+
+    ///<summary>Сбой выполнения динамической последовательности</summary>
+    [Display(Name = "Сбой выполнения динамической последовательности")]
     DynamicSequenceRunFailed = 655,
-    
-    ///<summary>Device not allow bind</summary>
-    [Display(Name = "Device not allow bind")]
+
+    ///<summary>Привязка устройства запрещена</summary>
+    [Display(Name = "Привязка устройства запрещена")]
     DeviceNotAllowBind = 656,
-    
-    ///<summary>Device group config exist</summary>
-    [Display(Name = "Device group config exist")]
+
+    ///<summary>Конфигурация группы устройств уже существует</summary>
+    [Display(Name = "Конфигурация группы устройств уже существует")]
     DeviceGroupConfigExist = 657,
-    
-    ///<summary>This ir device not support copy</summary>
-    [Display(Name = "This ir device not support copy")]
+
+    ///<summary>Это IR-устройство не поддерживает копирование</summary>
+    [Display(Name = "Это IR-устройство не поддерживает копирование")]
     ThisIrDeviceNotSupportCopy = 658,
-    
-    ///<summary>Device function not support</summary>
-    [Display(Name = "Device function not support")]
+
+    ///<summary>Функция устройства не поддерживается</summary>
+    [Display(Name = "Функция устройства не поддерживается")]
     DeviceFunctionNotSupport = 664,
-    
-    ///<summary>Position not exist</summary>
-    [Display(Name = "Position not exist")]
+
+    ///<summary>Позиция не существует</summary>
+    [Display(Name = "Позиция не существует")]
     PositionNotExist = 701,
-    
-    ///<summary>Position cannot deleted</summary>
-    [Display(Name = "Position cannot deleted")]
+
+    ///<summary>Позиция не может быть удалена</summary>
+    [Display(Name = "Позиция не может быть удалена")]
     PositionCannotDeleted = 702,
-    
-    ///<summary>Position name duplication</summary>
-    [Display(Name = "Position name duplication")]
+
+    ///<summary>Дублирование имени позиции</summary>
+    [Display(Name = "Дублирование имени позиции")]
     PositionNameDuplication = 703,
-    
-    ///<summary>Default position create duplication</summary>
-    [Display(Name = "Default position create duplication")]
+
+    ///<summary>Дублирование при создании позиции по умолчанию</summary>
+    [Display(Name = "Дублирование при создании позиции по умолчанию")]
     DefaultPositionCreateDuplication = 704,
-    
-    ///<summary>Device name duplication</summary>
-    [Display(Name = "Device name duplication")]
+
+    ///<summary>Дублирование имени устройства</summary>
+    [Display(Name = "Дублирование имени устройства")]
     DeviceNameDuplication = 705,
-    
-    ///<summary>Device permission denied</summary>
-    [Display(Name = "Device permission denied")]
+
+    ///<summary>Отказано в доступе к устройству</summary>
+    [Display(Name = "Отказано в доступе к устройству")]
     DevicePermissionDenied1 = 706,
-    
-    ///<summary>Ifttt permission denied</summary>
-    [Display(Name = "Ifttt permission denied")]
+
+    ///<summary>Отказано в доступе IFTTT</summary>
+    [Display(Name = "Отказано в доступе IFTTT")]
     IftttPermissionDenied = 707,
-    
-    ///<summary>Scene permission denied</summary>
-    [Display(Name = "Scene permission denied")]
+
+    ///<summary>Отказано в доступе к сцене</summary>
+    [Display(Name = "Отказано в доступе к сцене")]
     ScenePermissionDenied = 708,
-    
-    ///<summary>Service permission denied</summary>
-    [Display(Name = "Service permission denied")]
+
+    ///<summary>Отказано в доступе к сервису</summary>
+    [Display(Name = "Отказано в доступе к сервису")]
     ServicePermissionDenied = 709,
-    
-    ///<summary>Position permission denied</summary>
-    [Display(Name = "Position permission denied")]
+
+    ///<summary>Отказано в доступе к позиции</summary>
+    [Display(Name = "Отказано в доступе к позиции")]
     PositionPermissionDenied = 710,
-    
-    ///<summary>Parent position error</summary>
-    [Display(Name = "Parent position error")]
+
+    ///<summary>Ошибка родительской позиции</summary>
+    [Display(Name = "Ошибка родительской позиции")]
     ParentPositionError = 712,
-    
-    ///<summary>Position not real position</summary>
-    [Display(Name = "Position not real position")]
+
+    ///<summary>Позиция не является реальной позицией</summary>
+    [Display(Name = "Позиция не является реальной позицией")]
     PositionNotRealPosition = 713,
-    
-    ///<summary>Position is not allowed to be deleted</summary>
-    [Display(Name = "Position is not allowed to be deleted")]
+
+    ///<summary>Позиция не допускается к удалению</summary>
+    [Display(Name = "Позиция не допускается к удалению")]
     PositionIsNotAllowedToBeDeleted = 714,
-    
-    ///<summary>Position error</summary>
-    [Display(Name = "Position error")]
+
+    ///<summary>Ошибка позиции</summary>
+    [Display(Name = "Ошибка позиции")]
     PositionError = 715,
-    
-    ///<summary>Scene not exist</summary>
-    [Display(Name = "Scene not exist")]
+
+    ///<summary>Сцена не существует</summary>
+    [Display(Name = "Сцена не существует")]
     SceneNotExist = 716,
-    
-    ///<summary>Device does not belong to this user</summary>
-    [Display(Name = "Device does not belong to this user")]
+
+    ///<summary>Устройство не принадлежит этому пользователю</summary>
+    [Display(Name = "Устройство не принадлежит этому пользователю")]
     DeviceDoesNotBelongToThisUser = 717,
-    
-    ///<summary>Data error</summary>
-    [Display(Name = "Data error")]
+
+    ///<summary>Ошибка данных</summary>
+    [Display(Name = "Ошибка данных")]
     DataError = 718,
-    
-    ///<summary>Device no bind user</summary>
-    [Display(Name = "Device no bind user")]
+
+    ///<summary>Устройство не привязано к пользователю</summary>
+    [Display(Name = "Устройство не привязано к пользователю")]
     DeviceNoBindUser = 719,
-    
-    ///<summary>Out of position layer</summary>
-    [Display(Name = "Out of position layer")]
+
+    ///<summary>Выход за пределы уровня позиции</summary>
+    [Display(Name = "Выход за пределы уровня позиции")]
     OutOfPositionLayer = 722,
-    
-    ///<summary>Device size beyond</summary>
-    [Display(Name = "Device size beyond")]
+
+    ///<summary>Размер устройства превышает допустимый</summary>
+    [Display(Name = "Размер устройства превышает допустимый")]
     DeviceSizeBeyond = 726,
-    
-    ///<summary>Position size beyond</summary>
-    [Display(Name = "Position size beyond")]
+
+    ///<summary>Размер позиции превышает допустимый</summary>
+    [Display(Name = "Размер позиции превышает допустимый")]
     PositionSizeBeyond = 727,
-    
-    ///<summary>Start or end time cannot be empty</summary>
-    [Display(Name = "Start or end time cannot be empty")]
+
+    ///<summary>Время начала или окончания не может быть пустым</summary>
+    [Display(Name = "Время начала или окончания не может быть пустым")]
     StartOrEndTimeCannotBeEmpty = 728,
-    
-    ///<summary>The start time must not be greater than the end time</summary>
-    [Display(Name = "The start time must not be greater than the end time")]
+
+    ///<summary>Время начала не должно быть больше времени окончания</summary>
+    [Display(Name = "Время начала не должно быть больше времени окончания")]
     TheStartTimeMustNotBeGreaterThanTheEndTime = 729,
-    
-    ///<summary>Start or end time not a timestamp</summary>
-    [Display(Name = "Start or end time not a timestamp")]
+
+    ///<summary>Время начала или окончания не является временной меткой</summary>
+    [Display(Name = "Время начала или окончания не является временной меткой")]
     StartOrEndTimeNotATimestamp = 730,
-    
-    ///<summary>Ifttt not exists</summary>
-    [Display(Name = "Ifttt not exists")]
+
+    ///<summary>IFTTT не существует</summary>
+    [Display(Name = "IFTTT не существует")]
     IftttNotExists = 731,
-    
-    ///<summary>BindKey not exists</summary>
-    [Display(Name = "BindKey not exists")]
+
+    ///<summary>BindKey не существует</summary>
+    [Display(Name = "BindKey не существует")]
     BindKeyNotExists = 745,
-    
-    ///<summary>Gateway not connect cloud</summary>
-    [Display(Name = "Gateway not connect cloud")]
+
+    ///<summary>Шлюз не подключен к облаку</summary>
+    [Display(Name = "Шлюз не подключен к облаку")]
     GatewayNotConnectCloud = 746,
-    
-    ///<summary>Device unsupported</summary>
-    [Display(Name = "Device unsupported")]
+
+    ///<summary>Устройство не поддерживается</summary>
+    [Display(Name = "Устройство не поддерживается")]
     DeviceUnsupported = 747,
-    
-    ///<summary>Category model not exists</summary>
-    [Display(Name = "Category model not exists")]
+
+    ///<summary>Модель категории не существует</summary>
+    [Display(Name = "Модель категории не существует")]
     CategoryModelNotExists = 748,
-    
-    ///<summary>Custom Action name duplicate</summary>
-    [Display(Name = "Custom Action name duplicate")]
+
+    ///<summary>Дублирование имени пользовательского действия</summary>
+    [Display(Name = "Дублирование имени пользовательского действия")]
     CustomActionNameDuplicate = 749,
-    
-    ///<summary>Ircode key not exists</summary>
-    [Display(Name = "Ircode key not exists")]
+
+    ///<summary>Ключ Ircode не существует</summary>
+    [Display(Name = "Ключ Ircode не существует")]
     IrcodeKeyNotExists = 750,
-    
-    ///<summary>BindKey has been used</summary>
-    [Display(Name = "BindKey has been used")]
+
+    ///<summary>BindKey уже использован</summary>
+    [Display(Name = "BindKey уже использован")]
     BindKeyHasBeenUsed = 751,
-    
-    ///<summary>ir device limit</summary>
-    [Display(Name = "ir device limit")]
+
+    ///<summary>Лимит IR-устройств</summary>
+    [Display(Name = "Лимит IR-устройств")]
     IrDeviceLimit = 753,
-    
-    ///<summary>Custom Action not exist</summary>
-    [Display(Name = "Custom Action not exist")]
+
+    ///<summary>Пользовательское действие не существует</summary>
+    [Display(Name = "Пользовательское действие не существует")]
     CustomActionNotExist = 754,
-    
-    ///<summary>subject permission denied</summary>
-    [Display(Name = "subject permission denied")]
+
+    ///<summary>Отказано в доступе субъекту</summary>
+    [Display(Name = "Отказано в доступе субъекту")]
     SubjectPermissionDenied = 755,
-    
-    ///<summary>no permissions</summary>
-    [Display(Name = "no permissions")]
+
+    ///<summary>Нет прав</summary>
+    [Display(Name = "Нет прав")]
     NoPermissions = 756,
-    
-    ///<summary>Device not bind user</summary>
-    [Display(Name = "Device not bind user")]
+
+    ///<summary>Устройство не привязано к пользователю</summary>
+    [Display(Name = "Устройство не привязано к пользователю")]
     DeviceNotBindUser = 757,
-    
-    ///<summary>Param length limit</summary>
-    [Display(Name = "Param length limit")]
+
+    ///<summary>Превышен лимит длины параметра</summary>
+    [Display(Name = "Превышен лимит длины параметра")]
     ParamLengthLimit = 758,
-    
-    ///<summary>Action not support</summary>
-    [Display(Name = "Action not support")]
+
+    ///<summary>Действие не поддерживается</summary>
+    [Display(Name = "Действие не поддерживается")]
     ActionNotSupport = 760,
-    
-    ///<summary>Trigger not support</summary>
-    [Display(Name = "Trigger not support")]
+
+    ///<summary>Триггер не поддерживается</summary>
+    [Display(Name = "Триггер не поддерживается")]
     TriggerNotSupport = 763,
-    
-    ///<summary>Ifttt name has exists</summary>
-    [Display(Name = "Ifttt name has exists")]
+
+    ///<summary>Имя IFTTT уже существует</summary>
+    [Display(Name = "Имя IFTTT уже существует")]
     IftttNameHasExists = 768,
-    
-    ///<summary>Scene name has exists</summary>
-    [Display(Name = "Scene name has exists")]
+
+    ///<summary>Имя сцены уже существует</summary>
+    [Display(Name = "Имя сцены уже существует")]
     SceneNameHasExists = 769,
-    
-    ///<summary>Device name has exists</summary>
-    [Display(Name = "Device name has exists")]
+
+    ///<summary>Имя устройства уже существует</summary>
+    [Display(Name = "Имя устройства уже существует")]
     DeviceNameHasExists = 770,
-    
-    ///<summary>The device can not unbind</summary>
-    [Display(Name = "The device can not unbind")]
+
+    ///<summary>Устройство нельзя отвязать</summary>
+    [Display(Name = "Устройство нельзя отвязать")]
     TheDeviceCanNotUnbind = 778,
-    
-    ///<summary>Condition event Permission denied</summary>
-    [Display(Name = "Condition event Permission denied")]
+
+    ///<summary>Отказано в доступе к событию условия</summary>
+    [Display(Name = "Отказано в доступе к событию условия")]
     ConditionEventPermissionDenied = 788,
-    
-    ///<summary>Condition event duplicate name</summary>
-    [Display(Name = "Condition event duplicate name")]
+
+    ///<summary>Дублирование имени события условия</summary>
+    [Display(Name = "Дублирование имени события условия")]
     ConditionEventDuplicateName = 789,
-    
-    ///<summary>Account not register</summary>
-    [Display(Name = "Account not register")]
+
+    ///<summary>Учётная запись не зарегистрирована</summary>
+    [Display(Name = "Учётная запись не зарегистрирована")]
     AccountNotRegister = 801,
-    
-    ///<summary>Account not login</summary>
-    [Display(Name = "Account not login")]
+
+    ///<summary>Пользователь не вошёл в систему</summary>
+    [Display(Name = "Пользователь не вошёл в систему")]
     AccountNotLogin = 802,
-    
-    ///<summary>User permission denied</summary>
-    [Display(Name = "User permission denied")]
+
+    ///<summary>Отказано в доступе пользователю</summary>
+    [Display(Name = "Отказано в доступе пользователю")]
     UserPermissionDenied = 803,
-    
-    ///<summary>Token failed</summary>
-    [Display(Name = "Token failed")]
+
+    ///<summary>Ошибка токена</summary>
+    [Display(Name = "Ошибка токена")]
     TokenFailed = 804,
-    
-    ///<summary>Account has register</summary>
-    [Display(Name = "Account has register")]
+
+    ///<summary>Аккаунт уже зарегистрирован</summary>
+    [Display(Name = "Аккаунт уже зарегистрирован")]
     AccountHasRegister = 805,
-    
-    ///<summary>Account format error</summary>
-    [Display(Name = "Account format error")]
+
+    ///<summary>Неверный формат аккаунта</summary>
+    [Display(Name = "Неверный формат аккаунта")]
     AccountFormatError = 807,
-    
-    ///<summary>Password incorrect</summary>
-    [Display(Name = "Password incorrect")]
+
+    ///<summary>Неверный пароль</summary>
+    [Display(Name = "Неверный пароль")]
     PasswordIncorrect = 810,
-    
-    ///<summary>AuthCode incorrect</summary>
-    [Display(Name = "AuthCode incorrect")]
+
+    ///<summary>Неверный код подтверждения</summary>
+    [Display(Name = "Неверный код подтверждения")]
     AuthCodeIncorrect = 811,
-    
-    ///<summary>Account type unsupport</summary>
-    [Display(Name = "Account type unsupport")]
+
+    ///<summary>Тип аккаунта не поддерживается</summary>
+    [Display(Name = "Тип аккаунта не поддерживается")]
     AccountTypeUnsupport = 812,
-    
-    ///<summary>AuthCode incorrect</summary>
-    [Display(Name = "AuthCode incorrect")]
+
+    ///<summary>Неверный код подтверждения</summary>
+    [Display(Name = "Неверный код подтверждения")]
     AuthCodeIncorrect1 = 816,
-    
-    ///<summary>AuthCode send all too often</summary>
-    [Display(Name = "AuthCode send all too often")]
+
+    ///<summary>Код подтверждения отправляется слишком часто</summary>
+    [Display(Name = "Код подтверждения отправляется слишком часто")]
     AuthCodeSendAllTooOften = 817,
-    
-    ///<summary>AuthCode is invalid</summary>
-    [Display(Name = "AuthCode is invalid")]
+
+    ///<summary>Код подтверждения недействителен</summary>
+    [Display(Name = "Код подтверждения недействителен")]
     AuthCodeIsInvalid = 820,
-    
-    ///<summary>Upgrade error</summary>
-    [Display(Name = "Upgrade error")]
+
+    ///<summary>Ошибка обновления</summary>
+    [Display(Name = "Ошибка обновления")]
     UpgradeError = 901,
-    
-    ///<summary>Firmware not exist</summary>
-    [Display(Name = "Firmware not exist")]
+
+    ///<summary>Прошивка не существует</summary>
+    [Display(Name = "Прошивка не существует")]
     FirmwareNotExist = 902,
-    
-    ///<summary>Package not exist</summary>
-    [Display(Name = "Package not exist")]
+
+    ///<summary>Пакет не существует</summary>
+    [Display(Name = "Пакет не существует")]
     PackageNotExist = 903,
-    
-    ///<summary>Firmware already up to date</summary>
-    [Display(Name = "Firmware already up to date")]
+
+    ///<summary>Прошивка уже обновлена</summary>
+    [Display(Name = "Прошивка уже обновлена")]
     FirmwareAlreadyUpToDate = 904,
-    
-    ///<summary>Firmware query is empty</summary>
-    [Display(Name = "Firmware query is empty")]
+
+    ///<summary>Запрос прошивки пуст</summary>
+    [Display(Name = "Запрос прошивки пуст")]
     FirmwareQueryIsEmpty = 905,
-    
-    ///<summary>No updatable firmware</summary>
-    [Display(Name = "No updatable firmware")]
+
+    ///<summary>Нет доступной для обновления прошивки</summary>
+    [Display(Name = "Нет доступной для обновления прошивки")]
     NoUpdatableFirmware = 906,
-    
-    ///<summary>firmware upgrade failed</summary>
-    [Display(Name = "firmware upgrade failed")]
+
+    ///<summary>Не удалось обновить прошивку</summary>
+    [Display(Name = "Не удалось обновить прошивку")]
     FirmwareUpgradeFailed = 907,
-    
-    ///<summary>Device is being upgrade</summary>
-    [Display(Name = "Device is being upgrade")]
+
+    ///<summary>Устройство обновляется</summary>
+    [Display(Name = "Устройство обновляется")]
     DeviceIsBeingUpgrade = 908,
-    
-    ///<summary>The sub device's gateway is being upgraded</summary>
-    [Display(Name = "The sub device's gateway is being upgraded")]
+
+    ///<summary>Шлюз субустройства обновляется</summary>
+    [Display(Name = "Шлюз субустройства обновляется")]
     TheSubDeviceGatewayIsBeingUpgraded = 909,
-    
-    ///<summary>The gateway's sub device are being upgraded</summary>
-    [Display(Name = "The gateway's sub device are being upgraded")]
+
+    ///<summary>Подустройства шлюза обновляются</summary>
+    [Display(Name = "Подустройства шлюза обновляются")]
     TheGatewaySubDeviceAreBeingUpgraded = 910,
-    
-    ///<summary>The sub device's gateway is also upgraded</summary>
-    [Display(Name = "The sub device's gateway is also upgraded")]
+
+    ///<summary>Шлюз субустройства также обновлён</summary>
+    [Display(Name = "Шлюз субустройства также обновлён")]
     TheSubDeviceGatewayIsAlsoUpgraded = 911,
-    
-    ///<summary>Model can't be upgraded with firmware</summary>
-    [Display(Name = "Model can't be upgraded with firmware")]
+
+    ///<summary>Модель не может быть обновлена с помощью прошивки</summary>
+    [Display(Name = "Модель не может быть обновлена с помощью прошивки")]
     ModelCanNotBeUpgradedWithFirmware = 912,
-    
-    ///<summary>Resource attr illegal</summary>
-    [Display(Name = "Resource attr illegal")]
+
+    ///<summary>Недопустимый атрибут ресурса</summary>
+    [Display(Name = "Недопустимый атрибут ресурса")]
     ResourceAttrIllegal = 1003,
-    
-    ///<summary>Resource value illegal</summary>
-    [Display(Name = "Resource value illegal")]
+
+    ///<summary>Недопустимое значение ресурса</summary>
+    [Display(Name = "Недопустимое значение ресурса")]
     ResourceValueIllegal = 1004,
-    
-    ///<summary>Subject type not support</summary>
-    [Display(Name = "Subject type not support")]
+
+    ///<summary>Тип субъекта не поддерживается</summary>
+    [Display(Name = "Тип субъекта не поддерживается")]
     SubjectTypeNotSupport = 1006,
-    
-    ///<summary>Resource write not support</summary>
-    [Display(Name = "Resource write not support")]
+
+    ///<summary>Запись ресурса не поддерживается</summary>
+    [Display(Name = "Запись ресурса не поддерживается")]
     ResourceWriteNotSupport = 1007,
-    
-    ///<summary>Resource attr not exist</summary>
-    [Display(Name = "Resource attr not exist")]
+
+    ///<summary>Атрибут ресурса не существует</summary>
+    [Display(Name = "Атрибут ресурса не существует")]
     ResourceAttrNotExist = 1008,
-    
-    ///<summary>Report attr error</summary>
-    [Display(Name = "Report attr error")]
+
+    ///<summary>Ошибка отчёта атрибута</summary>
+    [Display(Name = "Ошибка отчёта атрибута")]
     ReportAttrError = 1009,
-    
-    ///<summary>Report resourceId error</summary>
-    [Display(Name = "Report resourceId error")]
+
+    ///<summary>Ошибка идентификатора ресурса при отчёте</summary>
+    [Display(Name = "Ошибка идентификатора ресурса при отчёте")]
     ReportResourceIdError = 1010,
-    
-    ///<summary>Linkage not exist</summary>
-    [Display(Name = "Linkage not exist")]
+
+    ///<summary>Связь не существует</summary>
+    [Display(Name = "Связь не существует")]
     LinkageNotExist = 1201,
-    
-    ///<summary>Scene not exist</summary>
-    [Display(Name = "Scene not exist")]
+
+    ///<summary>Сцена не существует</summary>
+    [Display(Name = "Сцена не существует")]
     SceneNotExist1 = 1202,
-    
-    ///<summary>Ifttt execute condition not satisfied</summary>
-    [Display(Name = "Ifttt execute condition not satisfied")]
+
+    ///<summary>Условие выполнения IFTTT не выполнено</summary>
+    [Display(Name = "Условие выполнения IFTTT не выполнено")]
     IftttExecuteConditionNotSatisfied = 1203,
-    
-    ///<summary>linkage no device</summary>
-    [Display(Name = "linkage no device")]
+
+    ///<summary>В связи отсутствует устройство</summary>
+    [Display(Name = "В связи отсутствует устройство")]
     LinkageNoDevice = 1204,
-    
-    ///<summary>Scene no device</summary>
-    [Display(Name = "Scene no device")]
+
+    ///<summary>В сцене отсутствует устройство</summary>
+    [Display(Name = "В сцене отсутствует устройство")]
     SceneNoDevice = 1205,
-    
-    ///<summary>Delete local linkage failed</summary>
-    [Display(Name = "Delete local linkage failed")]
+
+    ///<summary>Не удалось удалить локальную связь</summary>
+    [Display(Name = "Не удалось удалить локальную связь")]
     DeleteLocalLinkageFailed = 1206,
-    
-    ///<summary>Operation failed</summary>
-    [Display(Name = "Operation failed")]
+
+    ///<summary>Операция не удалась</summary>
+    [Display(Name = "Операция не удалась")]
     OperationFailed = 1207,
-    
-    ///<summary>Ifttt parameter error</summary>
-    [Display(Name = "Ifttt parameter error")]
+
+    ///<summary>Ошибка параметров IFTTT</summary>
+    [Display(Name = "Ошибка параметров IFTTT")]
     IftttParameterError = 1208,
-    
-    ///<summary>This action not definition</summary>
-    [Display(Name = "This action not definition")]
+
+    ///<summary>Действие не определено</summary>
+    [Display(Name = "Действие не определено")]
     ThisActionNotDefinition = 1210,
-    
-    ///<summary>This trigger not definition</summary>
-    [Display(Name = "This trigger not definition")]
+
+    ///<summary>Триггер не определён</summary>
+    [Display(Name = "Триггер не определён")]
     ThisTriggerNotDefinition = 1211,
-    
-    ///<summary>Action is empty</summary>
-    [Display(Name = "Action is empty")]
+
+    ///<summary>Действие пусто</summary>
+    [Display(Name = "Действие пусто")]
     ActionIsEmpty = 1212,
-    
-    ///<summary>Ifttt execute failed</summary>
-    [Display(Name = "Ifttt execute failed")]
+
+    ///<summary>Выполнение IFTTT не удалось</summary>
+    [Display(Name = "Выполнение IFTTT не удалось")]
     IftttExecuteFailed = 1221,
-    
-    ///<summary>Ifttt same name</summary>
-    [Display(Name = "Ifttt same name")]
+
+    ///<summary>IFTTT с таким именем уже существует</summary>
+    [Display(Name = "IFTTT с таким именем уже существует")]
     IftttSameName = 1223,
-    
-    ///<summary>scene same name</summary>
-    [Display(Name = "scene same name")]
+
+    ///<summary>Сцена с таким именем уже существует</summary>
+    [Display(Name = "Сцена с таким именем уже существует")]
     SceneSameName = 1224,
-    
-    ///<summary>Conditions of configuration is not correct</summary>
-    [Display(Name = "Conditions of configuration is not correct")]
+
+    ///<summary>Условия конфигурации некорректны</summary>
+    [Display(Name = "Условия конфигурации некорректны")]
     ConditionsOfConfigurationIsNotCorrect = 1226,
-    
-    ///<summary>Conditions of configuration is not correct</summary>
-    [Display(Name = "Conditions of configuration is not correct")]
+
+    ///<summary>Условия конфигурации некорректны</summary>
+    [Display(Name = "Условия конфигурации некорректны")]
     ConditionsOfConfigurationIsNotCorrect1 = 1227,
-    
-    ///<summary>Condition is repeated</summary>
-    [Display(Name = "Condition is repeated")]
+
+    ///<summary>Условие повторяется</summary>
+    [Display(Name = "Условие повторяется")]
     ConditionIsRepeated = 1228,
-    
-    ///<summary>Conditions of configuration is not correct</summary>
-    [Display(Name = "Conditions of configuration is not correct")]
+
+    ///<summary>Условия конфигурации некорректны</summary>
+    [Display(Name = "Условия конфигурации некорректны")]
     ConditionsOfConfigurationIsNotCorrect2 = 1229,
-    
-    ///<summary>Action is repeated</summary>
-    [Display(Name = "Action is repeated")]
+
+    ///<summary>Действие повторяется</summary>
+    [Display(Name = "Действие повторяется")]
     ActionIsRepeated = 1230,
-    
-    ///<summary>Actions of configuration is not correct</summary>
-    [Display(Name = "Actions of configuration is not correct")]
+
+    ///<summary>Действия в конфигурации некорректны</summary>
+    [Display(Name = "Действия в конфигурации некорректны")]
     ActionsOfConfigurationIsNotCorrect = 1231,
-    
-    ///<summary>Conditions and Actions of configuration is not correct</summary>
-    [Display(Name = "Conditions and Actions of configuration is not correct")]
+
+    ///<summary>Условия и действия конфигурации некорректны</summary>
+    [Display(Name = "Условия и действия конфигурации некорректны")]
     ConditionsAndActionsOfConfigurationIsNotCorrect = 1232,
-    
-    ///<summary>ifttt is abnormal</summary>
-    [Display(Name = "ifttt is abnormal")]
+
+    ///<summary>IFTTT работает ненормально</summary>
+    [Display(Name = "IFTTT работает ненормально")]
     IftttIsAbnormal = 1238,
-    
-    ///<summary>Conditions of configuration is not correct</summary>
-    [Display(Name = "Conditions of configuration is not correct")]
+
+    ///<summary>Условия конфигурации некорректны</summary>
+    [Display(Name = "Условия конфигурации некорректны")]
     ConditionsOfConfigurationIsNotCorrect3 = 1239,
-    
-    ///<summary>The data is in operation</summary>
-    [Display(Name = "The data is in operation")]
+
+    ///<summary>Данные находятся в процессе операции</summary>
+    [Display(Name = "Данные находятся в процессе операции")]
     TheDataIsInOperation = 1300,
-    
-    ///<summary>Get developer list error</summary>
-    [Display(Name = "Get developer list error")]
+
+    ///<summary>Ошибка получения списка разработчиков</summary>
+    [Display(Name = "Ошибка получения списка разработчиков")]
     GetDeveloperListError = 2001,
-    
-    ///<summary>Appid or Appkey illegal</summary>
-    [Display(Name = "Appid or Appkey illegal")]
+
+    ///<summary>Неверный appid или appkey</summary>
+    [Display(Name = "Неверный appid или appkey")]
     AppidOrAppkeyIllegal = 2002,
-    
-    ///<summary>AuthCode incorrect</summary>
-    [Display(Name = "AuthCode incorrect")]
+
+    ///<summary>Неверный код подтверждения</summary>
+    [Display(Name = "Неверный код подтверждения")]
     AuthCodeIncorrect2 = 2003,
-    
-    ///<summary>AccessToken incorrect</summary>
-    [Display(Name = "AccessToken incorrect")]
+
+    ///<summary>Неверный AccessToken</summary>
+    [Display(Name = "Неверный AccessToken")]
     AccessTokenIncorrect = 2004,
-    
-    ///<summary>AccessToken expired</summary>
-    [Display(Name = "AccessToken expired")]
+
+    ///<summary>AccessToken истёк</summary>
+    [Display(Name = "AccessToken истёк")]
     AccessTokenExpired = 2005,
-    
-    ///<summary>RefreshToken incorrect</summary>
-    [Display(Name = "RefreshToken incorrect")]
+
+    ///<summary>Неверный RefreshToken</summary>
+    [Display(Name = "Неверный RefreshToken")]
     RefreshTokenIncorrect = 2006,
-    
-    ///<summary>RefreshToken expired</summary>
-    [Display(Name = "RefreshToken expired")]
+
+    ///<summary>RefreshToken истёк</summary>
+    [Display(Name = "RefreshToken истёк")]
     RefreshTokenExpired = 2007,
-    
-    ///<summary>Permission denied</summary>
-    [Display(Name = "Permission denied")]
+
+    ///<summary>Доступ запрещён</summary>
+    [Display(Name = "Доступ запрещён")]
     PermissionDenied = 2008,
-    
-    ///<summary>Invalid OpenId</summary>
-    [Display(Name = "Invalid OpenId")]
+
+    ///<summary>Недействительный OpenId</summary>
+    [Display(Name = "Недействительный OpenId")]
     InvalidOpenId = 2009,
-    
-    ///<summary>Unauthorized user</summary>
-    [Display(Name = "Unauthorized user")]
+
+    ///<summary>Неавторизованный пользователь</summary>
+    [Display(Name = "Неавторизованный пользователь")]
     UnauthorizedUser = 2010,
-    
-    ///<summary>The query result is empty</summary>
-    [Display(Name = "The query result is empty")]
+
+    ///<summary>Результат запроса пуст</summary>
+    [Display(Name = "Результат запроса пуст")]
     TheQueryResultIsEmpty = 2011,
-    
-    ///<summary>Invalid apply</summary>
-    [Display(Name = "Invalid apply")]
+
+    ///<summary>Некорректный запрос</summary>
+    [Display(Name = "Некорректный запрос")]
     InvalidApply = 2012,
-    
-    ///<summary>Developer Permission denied</summary>
-    [Display(Name = "Developer Permission denied")]
+
+    ///<summary>Отказано в доступе разработчику</summary>
+    [Display(Name = "Отказано в доступе разработчику")]
     DeveloperPermissionDenied = 2013,
-    
-    ///<summary>Resource Permission denied</summary>
-    [Display(Name = "Resource Permission denied")]
+
+    ///<summary>Отказано в доступе к ресурсу</summary>
+    [Display(Name = "Отказано в доступе к ресурсу")]
     ResourcePermissionDenied = 2014,
-    
-    ///<summary>subscriber faild</summary>
-    [Display(Name = "subscriber faild")]
+
+    ///<summary>Ошибка подписки</summary>
+    [Display(Name = "Ошибка подписки")]
     SubscriberFaild = 2015,
-    
-    ///<summary>AccountId has exist</summary>
-    [Display(Name = "AccountId has exist")]
+
+    ///<summary>AccountId уже существует</summary>
+    [Display(Name = "AccountId уже существует")]
     AccountIdHasExist = 2016,
-    
-    ///<summary>Appkey exceeds the limit</summary>
-    [Display(Name = "Appkey exceeds the limit")]
+
+    ///<summary>Appkey превышает лимит</summary>
+    [Display(Name = "Appkey превышает лимит")]
     AppkeyExceedsTheLimit = 2017,
-    
-    ///<summary>IP config exceed the limit</summary>
-    [Display(Name = "IP config exceed the limit")]
+
+    ///<summary>Конфигурация IP превышает лимит</summary>
+    [Display(Name = "Конфигурация IP превышает лимит")]
     IPConfigExceedTheLimit = 2018,
-    
-    ///<summary>Application not activated</summary>
-    [Display(Name = "Application not activated")]
+
+    ///<summary>Приложение не активировано</summary>
+    [Display(Name = "Приложение не активировано")]
     ApplicationNotActivated = 2022,
 }
