@@ -2,6 +2,7 @@
 
 namespace Aqara.API.DTO;
 
+/// <summary>Контекст сериализации DTO Aqara</summary>
 [JsonSourceGenerationOptions(WriteIndented = false)]
 [JsonSerializable(typeof(AuthorizationCodeRequest))]
 [JsonSerializable(typeof(AccessTokenRequest))]

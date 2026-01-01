@@ -4,6 +4,25 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+/*
+Перед началом работы нужно добавить в секреты пользователя (User Secrets) следующие параметры:
+{
+  "Aqara": {
+    "AppId": "app-id...",
+    "AppKey": "app-key...",
+    "KeyId": "key-id...",
+    "Account": "user_email_account@server.ru"
+  }
+}
+
+Данные нужно взять с сайта https://developer.aqara.com
+Для этого нужно зарегистрироваться/залогиниться в https://developer.aqara.com/login?router=%2Fconsole%2Foverview%2Faccount
+После этого в разделе "Manage Project" создать проект. Проект даст значение appId.
+Зайдя в Details проекта в разделе Key management
+- Key Id = KeyId
+- Key = AppKey
+*/
+
 var host = Host.CreateDefaultBuilder(args)
    .UseConsoleLifetime(opt => opt.SuppressStatusMessages = true)
    .ConfigureAppConfiguration(cfg => cfg
@@ -45,8 +64,8 @@ try
     {
         Console.WriteLine("Требуется авторизация");
         var account = config["Aqara:Account"] ?? throw new InvalidOperationException("Не задан аккаунт");
-        var code = await client.GetAuthorizationKey(account, "24h");
-        if (code is not { Length: > 0 })
+
+        if (await client.GetAuthorizationKey(account, "24h") is not { Length: > 0 } code)
         {
             Console.WriteLine($"Код авторизации был отправлен на электронную почту {account}.");
             Console.Write("Введите полученный код:");
